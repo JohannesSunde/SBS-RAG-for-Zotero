@@ -21,8 +21,8 @@ On a Windows 10/11 machine:
 
 ```powershell
 # Clone the repo
-git clone https://github.com/aahepburn/Zotero-RAG-Assistant.git
-cd Zotero-RAG-Assistant
+git clone https://github.com/aahepburn/RAG-Assistant-for-Zotero.git
+cd RAG-Assistant-for-Zotero
 git checkout v0.2.0
 
 # Install dependencies
@@ -55,17 +55,17 @@ docker run -v $(pwd)/release:/app/release zotero-rag-linux npm run package:linux
 
 ## Step 4: Create GitHub Release Manually
 
-1. Go to: https://github.com/aahepburn/Zotero-RAG-Assistant/releases
+1. Go to: https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases
 
 2. Click "Draft a new release"
 
 3. **Tag**: `v0.2.0` (already exists)
 
-4. **Title**: `Zotero RAG Assistant v0.2.0`
+4. **Title**: `RAG Assistant for Zotero v0.2.0`
 
 5. **Description**:
 ```markdown
-# Zotero RAG Assistant v0.2.0
+# RAG Assistant for Zotero v0.2.0
 
 ## 🎉 What's New
 
@@ -94,18 +94,18 @@ Windows users can now enjoy native installers and portable distributions!
 ## 📥 Installation
 
 ### macOS
-Download `ZoteroRAG-0.2.0-mac-arm64.dmg` (Apple Silicon) or `ZoteroRAG-0.2.0-mac-x64.dmg` (Intel)
+Download `RAG-Assistant-0.2.0-mac-arm64.dmg` (Apple Silicon) or `RAG-Assistant-0.2.0-mac-x64.dmg` (Intel)
 
 ### Windows
-Download `ZoteroRAG-0.2.0-win-x64.exe` and run the installer.
+Download `RAG-Assistant-0.2.0-win-x64.exe` and run the installer.
 
 **Note:** Windows SmartScreen may warn about an unrecognized app. Click "More info" → "Run anyway". The app is safe but not code-signed.
 
 ### Linux
 Linux builds coming soon. For now, run from source:
 ```bash
-git clone https://github.com/aahepburn/Zotero-RAG-Assistant.git
-cd Zotero-RAG-Assistant
+git clone https://github.com/aahepburn/RAG-Assistant-for-Zotero.git
+cd RAG-Assistant-for-Zotero
 npm install
 cd frontend && npm install && cd ..
 source .venv/bin/activate  # Create venv first: python3 -m venv .venv
@@ -159,7 +159,7 @@ gh release create v0.2.0 \
   release/*.dmg \
   release/*.zip \
   release/*.yml \
-  --title "Zotero RAG Assistant v0.2.0" \
+  --title "RAG Assistant for Zotero v0.2.0" \
   --notes-file release_notes.md
 ```
 
@@ -168,22 +168,22 @@ gh release create v0.2.0 \
 Expected files:
 
 **macOS** (built locally):
-- [ ] ZoteroRAG-0.2.0-mac-arm64.dmg
-- [ ] ZoteroRAG-0.2.0-mac-x64.dmg
-- [ ] ZoteroRAG-0.2.0-mac-arm64.zip
-- [ ] ZoteroRAG-0.2.0-mac-x64.zip
+- [ ] RAG-Assistant-0.2.0-mac-arm64.dmg
+- [ ] RAG-Assistant-0.2.0-mac-x64.dmg
+- [ ] RAG-Assistant-0.2.0-mac-arm64.zip
+- [ ] RAG-Assistant-0.2.0-mac-x64.zip
 - [ ] latest-mac.yml
 
 **Windows** (need Windows machine):
-- [ ] ZoteroRAG-0.2.0-win-x64.exe
-- [ ] ZoteroRAG-0.2.0-win-ia32.exe
-- [ ] ZoteroRAG-0.2.0-win-x64.zip
-- [ ] ZoteroRAG-0.2.0-win-ia32.zip
+- [ ] RAG-Assistant-0.2.0-win-x64.exe
+- [ ] RAG-Assistant-0.2.0-win-ia32.exe
+- [ ] RAG-Assistant-0.2.0-win-x64.zip
+- [ ] RAG-Assistant-0.2.0-win-ia32.zip
 - [ ] latest.yml
 
 **Linux** (optional for this release):
-- [ ] ZoteroRAG-0.2.0-linux-x64.AppImage
-- [ ] zotero-rag-assistant_0.2.0_amd64.deb
+- [ ] RAG-Assistant-0.2.0-linux-x64.AppImage
+- [ ] RAG-Assistant-0.2.0-linux-amd64.deb
 - [ ] latest-linux.yml
 
 ## Alternative: macOS Only Release

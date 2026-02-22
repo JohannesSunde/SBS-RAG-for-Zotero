@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec file for bundling the Zotero RAG Assistant backend
+# PyInstaller spec file for bundling the RAG Assistant for Zotero backend
 # This creates a standalone Python distribution that includes all dependencies
 
 import sys

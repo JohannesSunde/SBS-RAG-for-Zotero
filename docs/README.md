@@ -1,6 +1,6 @@
 # Documentation Index
 
-Complete documentation for Zotero RAG Assistant.
+Complete documentation for RAG Assistant for Zotero.
 
 ## Getting Started
 

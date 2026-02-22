@@ -5,7 +5,7 @@ REM This creates a standalone Python bundle using PyInstaller for Windows
 
 echo.
 echo =========================================================================
-echo  Zotero RAG Assistant - Windows Python Bundle Builder
+echo  RAG Assistant for Zotero - Windows Python Bundle Builder
 echo =========================================================================
 echo.
 

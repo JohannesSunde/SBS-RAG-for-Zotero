@@ -217,4 +217,4 @@ Successfully implemented response-scoped source and snippet panels that replace 
 
 ## Conclusion
 
-The v0.2.0 panel refactor successfully transforms the Zotero RAG Assistant from a session-scoped to a response-scoped architecture. Users can now review evidence for any assistant response by simply clicking it, with sources and snippets dynamically updating in the side panels. The implementation maintains backward compatibility while providing a significantly improved user experience through better organization, visual feedback, and data persistence.
+The v0.2.0 panel refactor successfully transforms RAG Assistant for Zotero from a session-scoped to a response-scoped architecture. Users can now review evidence for any assistant response by simply clicking it, with sources and snippets dynamically updating in the side panels. The implementation maintains backward compatibility while providing a significantly improved user experience through better organization, visual feedback, and data persistence.

@@ -20,21 +20,21 @@ The app provides native `.deb` packages for Debian-based distributions (Ubuntu, 
 **Installation:**
 ```bash
 # Download the .deb
-wget https://github.com/aahepburn/Zotero-RAG-Assistant/releases/download/v0.1.7/zotero-rag-assistant_0.1.7_amd64.deb
+wget https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/download/v0.1.7/RAG-Assistant-0.1.7-linux-amd64.deb
 
 # Install
-sudo apt install ./zotero-rag-assistant_0.1.7_amd64.deb
+sudo apt install ./RAG-Assistant-0.1.7-linux-amd64.deb
 
 # Or use dpkg
-sudo dpkg -i zotero-rag-assistant_0.1.7_amd64.deb
+sudo dpkg -i RAG-Assistant-0.1.7-linux-amd64.deb
 sudo apt-get install -f  # Install dependencies if needed
 ```
 
 **Launch:**
 ```bash
-# From application menu (shows as "Zotero RAG Assistant")
+# From application menu (shows as "RAG Assistant for Zotero")
 # OR from terminal:
-zotero-rag-assistant
+rag-assistant
 ```
 
 ### 2. AppImage - Portable Alternative
@@ -47,13 +47,13 @@ zotero-rag-assistant
 **Usage:**
 ```bash
 # Download
-wget https://github.com/aahepburn/Zotero-RAG-Assistant/releases/download/v0.1.7/Zotero-RAG-Assistant-0.1.7-linux-x64.AppImage
+wget https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/download/v0.1.7/RAG-Assistant-0.1.7-linux-x64.AppImage
 
 # Make executable
-chmod +x Zotero-RAG-Assistant-0.1.7-linux-x64.AppImage
+chmod +x RAG-Assistant-0.1.7-linux-x64.AppImage
 
 # Run (sandbox should work automatically)
-./Zotero-RAG-Assistant-0.1.7-linux-x64.AppImage
+./RAG-Assistant-0.1.7-linux-x64.AppImage
 ```
 
 **Note:** On modern Debian/Ubuntu, the sandbox should work without `--no-sandbox`. If you encounter issues, see troubleshooting below.
@@ -98,9 +98,9 @@ The `.deb` package automatically installs these dependencies:
 
 ### What Happens During Installation
 
-1. **Package extracts to `/opt/Zotero RAG Assistant/`**
-   - Main binary: `/opt/Zotero RAG Assistant/zotero-rag-assistant`
-   - Sandbox helper: `/opt/Zotero RAG Assistant/chrome-sandbox`
+1. **Package extracts to `/opt/RAGAssistant/`**
+   - Main binary: `/opt/RAGAssistant/rag-assistant`
+   - Sandbox helper: `/opt/RAGAssistant/chrome-sandbox`
    - Resources and Python bundle included
 
 2. **Post-install script runs automatically** (`linux-postinstall.sh`)
@@ -117,11 +117,11 @@ The `.deb` package automatically installs these dependencies:
 
 ```bash
 # Check chrome-sandbox permissions
-ls -la "/opt/Zotero RAG Assistant/chrome-sandbox"
+ls -la "/opt/RAGAssistant/chrome-sandbox"
 # Should show: -rwsr-xr-x 1 root root
 
 # Test sandbox initialization
-zotero-rag-assistant --version
+rag-assistant --version
 # Should NOT show "Running without sandbox" warnings
 ```
 
@@ -145,9 +145,9 @@ npm run build
 npm run package:linux
 
 # Output files in release/:
-# - zotero-rag-assistant_0.1.7_amd64.deb
-# - zotero-rag-assistant_0.1.7_arm64.deb  
-# - Zotero-RAG-Assistant-0.1.7-linux-x64.AppImage
+# - RAG-Assistant-0.1.7-linux-amd64.deb
+# - RAG-Assistant-0.1.7-linux-arm64.deb  
+# - RAG-Assistant-0.1.7-linux-x64.AppImage
 # - latest-linux.yml (for auto-updates)
 ```
 
@@ -162,16 +162,16 @@ npm run package:linux
 
 ```bash
 # Install package
-sudo apt install ./zotero-rag-assistant_0.1.7_amd64.deb
+sudo apt install ./RAG-Assistant-0.1.7-linux-amd64.deb
 
 # Verify files installed
-dpkg -L zotero-rag-assistant
+dpkg -L rag-assistant
 
 # Check sandbox helper permissions
 ls -la "/opt/Zotero RAG Assistant/chrome-sandbox"
 
 # Launch from menu or terminal
-zotero-rag-assistant
+rag-assistant
 
 # Check for sandbox warnings in output
 # Should NOT see: "Running without the SUID sandbox"
@@ -181,24 +181,24 @@ zotero-rag-assistant
 
 ```bash
 # Install newer version over existing
-sudo apt install ./zotero-rag-assistant_0.1.8_amd64.deb
+sudo apt install ./RAG-Assistant-0.1.8-linux-amd64.deb
 
 # Verify upgrade worked
-zotero-rag-assistant --version
+rag-assistant --version
 ```
 
 ### Uninstall Test
 
 ```bash
 # Remove package
-sudo apt remove zotero-rag-assistant
+sudo apt remove rag-assistant
 
 # Verify files removed
 ls /opt | grep -i zotero
 # Should be empty
 
 # Check menu entry removed
-# "Zotero RAG Assistant" should not appear in app menu
+# "RAG Assistant for Zotero" should not appear in app menu
 ```
 
 ## Troubleshooting
@@ -210,8 +210,8 @@ ls /opt | grep -i zotero
 **Fix:**
 ```bash
 # Manually fix permissions
-sudo chown root:root "/opt/Zotero RAG Assistant/chrome-sandbox"
-sudo chmod 4755 "/opt/Zotero RAG Assistant/chrome-sandbox"
+sudo chown root:root "/opt/RAGAssistant/chrome-sandbox"
+sudo chmod 4755 "/opt/RAGAssistant/chrome-sandbox"
 ```
 
 ### "Operation not permitted" or "namespace" Errors
@@ -231,15 +231,15 @@ echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/00-local-user
 
 **Check:**
 1. Dependencies installed: `apt-cache policy libnotify4 libnss3 libxss1`
-2. Python bundle present: `ls "/opt/Zotero RAG Assistant/resources/python/"`
-3. Logs: Run `zotero-rag-assistant` from terminal to see error output
+2. Python bundle present: `ls "/opt/RAGAssistant/resources/python/"`
+3. Logs: Run `rag-assistant` from terminal to see error output
 
 ### AppImage Sandbox Issues
 
 **Workaround (not ideal but works):**
 ```bash
 # Only if sandbox truly doesn't work
-./Zotero-RAG-Assistant-0.1.7-linux-x64.AppImage --no-sandbox
+./RAG-Assistant-0.1.7-linux-x64.AppImage --no-sandbox
 ```
 
 **Better solution:** Use the `.deb` package instead for proper sandbox support.
@@ -255,7 +255,7 @@ echo "deb [signed-by=/usr/share/keyrings/zotero-rag.gpg] https://apt.zotero-rag.
 
 # Install and get automatic updates
 sudo apt update
-sudo apt install zotero-rag-assistant
+sudo apt install rag-assistant
 
 # Future updates via:
 sudo apt upgrade

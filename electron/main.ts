@@ -481,11 +481,11 @@ async function findSystemPython(): Promise<{ path: string; version?: string; sou
 
 /**
  * Setup Linux virtual environment on first run
- * Creates venv in ~/.config/zotero-rag-assistant/venv and installs dependencies
+ * Creates venv in ~/.config/rag-assistant/venv and installs dependencies
  */
 async function setupLinuxVenv(onProgress?: (message: string, progress?: number) => void): Promise<{ pythonPath: string; venvPath: string } | null> {
   const os = require('os');
-  const configDir = path.join(os.homedir(), '.config', 'zotero-rag-assistant');
+  const configDir = path.join(os.homedir(), '.config', 'rag-assistant');
   const venvPath = path.join(configDir, 'venv');
   const pythonBin = path.join(venvPath, 'bin', 'python3');
   
@@ -1256,12 +1256,12 @@ async function startBackend(): Promise<boolean> {
           errorSummary += 'Issue: Missing Python dependencies\n\n' +
             'On Linux, dependencies should be automatically installed.\n' +
             'Try removing the virtual environment and restarting:\n\n' +
-            '  rm -rf ~/.config/zotero-rag-assistant/venv\n\n';
+            '  rm -rf ~/.config/rag-assistant/venv\n\n';
         } else if (stderrText.includes('permission denied') || stderrText.includes('errno 13')) {
           errorSummary += 'Issue: File permission problem\n\n' +
             'Check that the application has permission to:\n' +
             '  - Read/execute Python files\n' +
-            '  - Write to ~/.config/zotero-rag-assistant/\n\n';
+            '  - Write to ~/.config/rag-assistant/\n\n';
         } else if (stderrText.includes('address already in use') || stderrText.includes('errno 98')) {
           errorSummary += 'Issue: Port 8000 is already in use\n\n' +
             'Another application is using the required port.\n' +
@@ -1484,7 +1484,7 @@ function createWindow(): void {
     height: 900,
     minWidth: 1000,
     minHeight: 600,
-    title: 'Zotero RAG Assistant',
+    title: 'RAG Assistant for Zotero',
     backgroundColor: '#1a1a1a',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -1609,7 +1609,7 @@ function createWindow(): void {
       `Reason: ${reasonText}\n` +
       `Exit code: ${details.exitCode}\n\n` +
       `If this persists on Linux, try launching with:\n` +
-      `  /opt/ZoteroRAG/zotero-rag-assistant --disable-gpu-sandbox\n\n` +
+      `  /opt/RAGAssistant/rag-assistant --disable-gpu-sandbox\n\n` +
       `Or report this issue on GitHub.`
     );
     

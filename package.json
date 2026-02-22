@@ -1,7 +1,7 @@
 {
-  "name": "zotero-rag-assistant",
-  "productName": "ZoteroRAG",
-  "version": "0.4.2",
+  "name": "rag-assistant",
+  "productName": "RAG Assistant",
+  "version": "0.4.3",
   "description": "AI-powered research assistant for your Zotero library",
   "main": "dist/electron/main.js",
   "author": {
@@ -11,9 +11,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aahepburn/zotero-rag-assistant.git"
+    "url": "https://github.com/aahepburn/RAG-Assistant-for-Zotero.git"
   },
-  "homepage": "https://github.com/aahepburn/zotero-rag-assistant",
+  "homepage": "https://github.com/aahepburn/RAG-Assistant-for-Zotero",
   "scripts": {
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "python3 -m uvicorn backend.main:app --reload --port 8000",
@@ -53,13 +53,13 @@
   },
   "build": {
     "appId": "com.aahepburn.zotero-rag",
-    "productName": "ZoteroRAG",
+    "productName": "RAG Assistant",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "publish": [
       {
         "provider": "github",
         "owner": "aahepburn",
-        "repo": "Zotero-RAG-Assistant",
+        "repo": "RAG-Assistant-for-Zotero",
         "releaseType": "release"
       }
     ],
@@ -220,17 +220,17 @@
       "synopsis": "AI-powered research assistant for Zotero",
       "description": "Chat with your Zotero library using AI. Get cited answers, search semantically, and manage your research with intelligent assistance.",
       "desktop": {
-        "Name": "Zotero RAG Assistant",
+        "Name": "RAG Assistant for Zotero",
         "Comment": "AI-powered research assistant for Zotero",
         "Categories": "Office;Education;Science;",
-        "StartupWMClass": "zotero-rag-assistant"
+        "StartupWMClass": "rag-assistant"
       },
-      "executableName": "zotero-rag-assistant",
+      "executableName": "rag-assistant",
       "maintainer": "aahepburn <your-email@example.com>",
       "vendor": "aahepburn"
     },
     "deb": {
-      "packageName": "zotero-rag-assistant",
+      "packageName": "rag-assistant",
       "depends": [
         "libgtk-3-0",
         "libnotify4",

@@ -2,7 +2,7 @@
 
 ##  Overview
 
-The Zotero RAG Assistant supports multiple LLM providers through a clean, provider-agnostic architecture:
+RAG Assistant for Zotero supports multiple LLM providers through a clean, provider-agnostic architecture:
 
 - **Ollama** (Local, free)
 - **OpenAI** (GPT-4, GPT-3.5)

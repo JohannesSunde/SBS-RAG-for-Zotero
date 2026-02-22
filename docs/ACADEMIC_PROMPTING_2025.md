@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive rework of the Zotero RAG Assistant's prompting strategy based on 2025 research and industry best practices for academic LLM assistants.
+This document describes the comprehensive rework of RAG Assistant for Zotero's prompting strategy based on 2025 research and industry best practices for academic LLM assistants.
 
 ## Key Changes
 

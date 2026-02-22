@@ -1,5 +1,5 @@
 #!/bin/bash
-# Create a default profile for Zotero RAG Assistant
+# Create a default profile for RAG Assistant for Zotero
 # This script creates the minimal directory structure and files needed for a profile
 
 set -e

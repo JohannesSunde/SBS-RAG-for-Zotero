@@ -44,7 +44,7 @@ If the venv is corrupted or partially installed:
 
 ```bash
 # Remove the existing virtual environment
-rm -rf ~/.config/zotero-rag-assistant/venv
+rm -rf ~/.config/rag-assistant/venv
 
 # Restart the application - it will recreate the venv
 ```
@@ -68,7 +68,7 @@ sudo pacman -S base-devel
 
 Unlike macOS/Windows which bundle Python, the Linux version:
 
-1. **First Run**: Creates a virtual environment at `~/.config/zotero-rag-assistant/venv`
+1. **First Run**: Creates a virtual environment at `~/.config/rag-assistant/venv`
 2. **Installs Dependencies**: Downloads and installs all required Python packages (takes 2-5 minutes)
 3. **Subsequent Runs**: Uses the existing venv (starts quickly)
 
@@ -109,16 +109,16 @@ sudo apt install build-essential python3-dev
 ping pypi.org
 
 # Try again with reset venv
-rm -rf ~/.config/zotero-rag-assistant/venv
+rm -rf ~/.config/rag-assistant/venv
 ```
 
 ### "Permission denied"
 ```bash
 # Fix permissions
-chmod -R u+rwX ~/.config/zotero-rag-assistant
+chmod -R u+rwX ~/.config/rag-assistant
 
 # Or recreate with correct permissions
-rm -rf ~/.config/zotero-rag-assistant
+rm -rf ~/.config/rag-assistant
 ```
 
 ### "Port 8000 already in use"
@@ -136,9 +136,9 @@ To see detailed error messages:
 
 1. **Run from terminal** to see stdout/stderr:
    ```bash
-   /path/to/ZoteroRAG.AppImage
+   /path/to/RAG-Assistant.AppImage
    # or
-   zotero-rag-assistant  # if installed via deb/rpm
+   rag-assistant  # if installed via deb/rpm
    ```
 
 2. **Open DevTools** in the app:
@@ -148,7 +148,7 @@ To see detailed error messages:
 
 3. **Check application logs** (if available):
    ```bash
-   cat ~/.config/zotero-rag-assistant/logs/*.log
+   cat ~/.config/rag-assistant/logs/*.log
    ```
 
 ## Still Having Issues?
@@ -160,7 +160,7 @@ To see detailed error messages:
    python3 --version
    
    # Check venv
-   ls -la ~/.config/zotero-rag-assistant/venv/
+   ls -la ~/.config/rag-assistant/venv/
    
    # Try manual venv creation
    python3 -m venv /tmp/test-venv
@@ -171,7 +171,7 @@ To see detailed error messages:
 2. **Run the backend manually** (for advanced troubleshooting):
    ```bash
    # Activate the venv
-   source ~/.config/zotero-rag-assistant/venv/bin/activate
+   source ~/.config/rag-assistant/venv/bin/activate
    
    # Navigate to the app resources
    cd /path/to/app/resources

@@ -1,6 +1,6 @@
 # Windows Build Quick Reference
 
-Quick commands for building Zotero RAG Assistant on Windows.
+Quick commands for building RAG Assistant for Zotero on Windows.
 
 ## Prerequisites
 - Python 3.8+ (with "Add to PATH" checked during install)
@@ -11,8 +11,8 @@ Quick commands for building Zotero RAG Assistant on Windows.
 
 ```powershell
 # Clone repository
-git clone https://github.com/aahepburn/Zotero-RAG-Assistant.git
-cd Zotero-RAG-Assistant
+git clone https://github.com/aahepburn/RAG-Assistant-for-Zotero.git
+cd RAG-Assistant-for-Zotero
 
 # Install dependencies
 npm install
@@ -39,9 +39,9 @@ npm run package:win
 ## Output Files
 
 Located in `release/` directory:
-- `ZoteroRAG-{version}-win-x64.exe` - 64-bit installer
-- `ZoteroRAG-{version}-win-ia32.exe` - 32-bit installer
-- `ZoteroRAG-{version}-win-x64.zip` - Portable 64-bit
+- `RAG-Assistant-{version}-win-x64.exe` - 64-bit installer
+- `RAG-Assistant-{version}-win-ia32.exe` - 32-bit installer
+- `RAG-Assistant-{version}-win-x64.zip` - Portable 64-bit
 - `latest.yml` - Auto-update config
 
 ## Development Mode

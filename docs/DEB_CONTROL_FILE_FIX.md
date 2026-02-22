@@ -8,7 +8,7 @@
 
 **Error**: 
 ```
-dpkg: error parsing file '/var/lib/dpkg/tmp.ci/control' near line 14 package 'zotero-rag-assistant'
+dpkg: error parsing file '/var/lib/dpkg/tmp.ci/control' near line 14 package 'rag-assistant'
 ```
 
 **Root Cause**: The `--description` flag in `package.json` contained a single long line that got wrapped by `fpm` without proper Debian control file formatting.
@@ -69,10 +69,10 @@ This will create a new `.deb` in the `release/` directory.
 mkdir -p /tmp/zra-test
 
 # Extract control file (on Linux)
-dpkg-deb -R release/ZoteroRAG-0.2.2-linux-amd64.deb /tmp/zra-test
+dpkg-deb -R release/RAG-Assistant-0.2.2-linux-amd64.deb /tmp/zra-test
 
 # Or on macOS
-ar -x release/ZoteroRAG-0.2.2-linux-amd64.deb
+ar -x release/RAG-Assistant-0.2.2-linux-amd64.deb
 tar -xzf control.tar.gz -C /tmp/zra-test
 
 # View control file
@@ -98,16 +98,16 @@ Check that:
 
 ```bash
 # Install the package
-sudo dpkg -i release/ZoteroRAG-0.2.2-linux-amd64.deb
+sudo dpkg -i release/RAG-Assistant-0.2.2-linux-amd64.deb
 
 # If dependencies are missing
 sudo apt-get install -f
 
 # Verify installation
-dpkg -l | grep zotero-rag-assistant
+dpkg -l | grep rag-assistant
 
 # Launch the app
-zotero-rag-assistant
+rag-assistant
 ```
 
 ### 5. Validate Package with Lintian (Optional)
@@ -115,7 +115,7 @@ zotero-rag-assistant
 On a Debian/Ubuntu system:
 
 ```bash
-lintian release/ZoteroRAG-0.2.2-linux-amd64.deb
+lintian release/RAG-Assistant-0.2.2-linux-amd64.deb
 ```
 
 This will show any policy violations or warnings.
@@ -125,7 +125,7 @@ This will show any policy violations or warnings.
 After the fix, the control file should look like:
 
 ```
-Package: zotero-rag-assistant
+Package: rag-assistant
 Version: 0.2.2
 License: MIT
 Vendor: Alexander Hepburn
@@ -136,7 +136,7 @@ Depends: libgtk-3-0, libnotify4, libxtst6, libnss3, libxss1, libasound2, libgbm1
 Recommends: libappindicator3-1
 Section: default
 Priority: optional
-Homepage: https://github.com/aahepburn/Zotero-RAG-Assistant
+Homepage: https://github.com/aahepburn/RAG-Assistant-for-Zotero
 Description: AI-powered research assistant for your Zotero library.
  Chat with your documents and get cited answers with page numbers.
  Search semantically across your research collection.

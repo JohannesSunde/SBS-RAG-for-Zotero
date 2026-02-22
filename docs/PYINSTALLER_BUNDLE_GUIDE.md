@@ -98,9 +98,9 @@ npm run package:linux  # Linux
 - **`release/latest.yml`** - Critical for Windows auto-updates!
 
 **What this creates for Linux:**
-- `release/zotero-rag-assistant_{version}_amd64.deb` (Debian/Ubuntu)
-- `release/zotero-rag-assistant_{version}_arm64.deb` (ARM 64-bit)
-- `release/Zotero-RAG-Assistant-{version}-linux-x64.AppImage` (Portable)
+- `release/RAG-Assistant-{version}-linux-amd64.deb` (Debian/Ubuntu)
+- `release/RAG-Assistant-{version}-linux-arm64.deb` (ARM 64-bit)
+- `release/RAG-Assistant-{version}-linux-x64.AppImage` (Portable)
 - **`release/latest-linux.yml`** - Critical for Linux auto-updates!
 
 ### Step 3: Verify DMG Layout
@@ -115,10 +115,10 @@ Mount the DMG and check:
 **macOS:**
 ```bash
 # Check the built app's bundle
-ls -la "release/mac-arm64/Zotero RAG Assistant.app/Contents/Resources/python/"
+ls -la "release/mac-arm64/RAG Assistant.app/Contents/Resources/python/"
 
 # Should show backend_server (not a symlink)
-file "release/mac-arm64/Zotero RAG Assistant.app/Contents/Resources/python/backend_server"
+file "release/mac-arm64/RAG Assistant.app/Contents/Resources/python/backend_server"
 # Should show: Mach-O 64-bit executable arm64
 ```
 
@@ -131,17 +131,17 @@ Get-ChildItem python-dist\backend_server.exe
 python-dist\backend_server.exe --help
 
 # After packaging, check the app resources
-# The installer places files in: C:\Users\{username}\AppData\Local\Programs\ZoteroRAG\resources\python\
+# The installer places files in: C:\Users\{username}\AppData\Local\Programs\RAG Assistant\resources\python\
 ```
 
 **Linux:**
 ```bash
 # Extract and check the .deb package
-dpkg-deb -c release/zotero-rag-assistant_*_amd64.deb | grep backend_server
+dpkg-deb -c release/RAG-Assistant-*-linux-amd64.deb | grep backend_server
 # Should show the backend_server executable
 
 # For AppImage
-./release/Zotero-RAG-Assistant-*-linux-x64.AppImage --appimage-extract
+./release/RAG-Assistant-*-linux-x64.AppImage --appimage-extract
 file squashfs-root/resources/python/backend_server
 # Should show: ELF 64-bit executable
 ```
@@ -150,7 +150,7 @@ file squashfs-root/resources/python/backend_server
 
 ```bash
 # Install from DMG
-open "release/Zotero RAG Assistant-{version}-mac-arm64.dmg"
+open "release/RAG Assistant-{version}-mac-arm64.dmg"
 # Drag to Applications
 # Launch and verify backend starts
 ```

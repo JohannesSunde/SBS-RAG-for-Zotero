@@ -1,6 +1,6 @@
 # Auto-Update System
 
-This document describes the automatic update system implemented in Zotero RAG Assistant.
+This document describes the automatic update system implemented in RAG Assistant for Zotero.
 
 ## Overview
 
@@ -91,7 +91,7 @@ When an update is found:
       {
         "provider": "github",
         "owner": "aahepburn",
-        "repo": "Zotero-RAG-Assistant",
+        "repo": "RAG-Assistant-for-Zotero",
         "releaseType": "release"
       }
     ]
@@ -237,7 +237,7 @@ GH_TOKEN=your_token electron-builder --mac --publish always
 
 **Manual download link not working**
 - Verify you have internet connection
-- Try opening https://github.com/aahepburn/Zotero-RAG-Assistant/releases/latest directly
+- Try opening https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/latest directly
 - Check if GitHub is accessible from your network
 
 **Update check fails**

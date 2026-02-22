@@ -49,7 +49,7 @@ def main():
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
     
-    print(f"Starting Zotero RAG Assistant backend server on {host}:{available_port}")
+    print(f"Starting RAG Assistant for Zotero backend server on {host}:{available_port}")
     print(f"PyInstaller bundle - Python {sys.version}")
     
     # Import the app directly (not as a string) so PyInstaller can find it

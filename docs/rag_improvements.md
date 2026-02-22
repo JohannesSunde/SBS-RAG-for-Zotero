@@ -433,7 +433,7 @@ Track these metrics over time:
 
 ## Summary
 
-These improvements bring your Zotero RAG system in line with current best practices for document retrieval. The combination of:
+These improvements bring RAG Assistant for Zotero in line with current best practices for document retrieval. The combination of:
 - **BGE-base** (state-of-the-art embeddings, 768 dimensions)
 - **Hybrid search** (semantic + keyword matching)  
 - **Cross-encoder re-ranking** (accurate relevance scoring)

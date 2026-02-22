@@ -50,8 +50,8 @@ npm run build
 npm run package:mac
 ```
 **Verify output:**
-- [ ] `release/Zotero-RAG-Assistant-*-mac-arm64.dmg`
-- [ ] `release/Zotero-RAG-Assistant-*-mac-x64.dmg`
+- [ ] `release/RAG-Assistant-*-mac-arm64.dmg`
+- [ ] `release/RAG-Assistant-*-mac-x64.dmg`
 - [ ] `release/*.zip` files (both architectures)
 - [ ] `release/*.blockmap` files
 - [ ] `release/latest-mac.yml` ← Critical for auto-updates!
@@ -62,7 +62,7 @@ npm run build
 npm run package:win
 ```
 **Verify output:**
-- [ ] `release/Zotero-RAG-Assistant-*-win-x64.exe`
+- [ ] `release/RAG-Assistant-*-win-x64.exe`
 - [ ] `release/*.zip` files
 - [ ] `release/latest.yml` ← Critical for auto-updates!
 
@@ -72,9 +72,9 @@ npm run build
 npm run package:linux
 ```
 **Verify output:**
-- [ ] `release/zotero-rag-assistant_*_amd64.deb`
-- [ ] `release/zotero-rag-assistant_*_arm64.deb`
-- [ ] `release/Zotero-RAG-Assistant-*-linux-x64.AppImage`
+- [ ] `release/RAG-Assistant-*-linux-amd64.deb`
+- [ ] `release/RAG-Assistant-*-linux-arm64.deb`
+- [ ] `release/RAG-Assistant-*-linux-x64.AppImage`
 - [ ] `release/latest-linux.yml` ← Critical for auto-updates!
 
 ## Testing
@@ -104,8 +104,8 @@ npm run package:linux
 
 **Linux (.deb):**
 ```bash
-sudo apt install ./zotero-rag-assistant_*_amd64.deb
-zotero-rag-assistant
+sudo apt install ./RAG-Assistant-*-linux-amd64.deb
+rag-assistant
 ```
 - [ ] Dependencies install automatically
 - [ ] No sandbox warnings (no `--no-sandbox` needed)
@@ -114,8 +114,8 @@ zotero-rag-assistant
 
 **Linux (AppImage):**
 ```bash
-chmod +x Zotero-RAG-Assistant-*-linux-x64.AppImage
-./Zotero-RAG-Assistant-*-linux-x64.AppImage
+chmod +x RAG-Assistant-*-linux-x64.AppImage
+./RAG-Assistant-*-linux-x64.AppImage
 ```
 - [ ] Runs without `--no-sandbox` on modern systems
 - [ ] If sandbox issues occur, verify in docs/LINUX_PACKAGING.md
@@ -161,7 +161,7 @@ file python-dist/backend_server
 # Should show: executable (NOT symlink)
 
 # For macOS, check in built app:
-ls -la "release/mac-arm64/Zotero RAG Assistant.app/Contents/Resources/python/"
+ls -la "release/mac-arm64/RAG Assistant.app/Contents/Resources/python/"
 ```
 
 ### Auto-Update Files Missing

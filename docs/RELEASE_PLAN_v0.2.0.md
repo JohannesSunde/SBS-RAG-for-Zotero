@@ -104,23 +104,23 @@ The `.github/workflows/build-all.yml` workflow will:
 
 3. **Build artifacts created:**
    - **macOS**: 
-     - `ZoteroRAG-0.2.0-mac-arm64.dmg` (Apple Silicon)
-     - `ZoteroRAG-0.2.0-mac-x64.dmg` (Intel)
-     - `ZoteroRAG-0.2.0-mac-arm64.zip` (portable)
-     - `ZoteroRAG-0.2.0-mac-x64.zip` (portable)
+     - `RAG-Assistant-0.2.0-mac-arm64.dmg` (Apple Silicon)
+     - `RAG-Assistant-0.2.0-mac-x64.dmg` (Intel)
+     - `RAG-Assistant-0.2.0-mac-arm64.zip` (portable)
+     - `RAG-Assistant-0.2.0-mac-x64.zip` (portable)
      - `latest-mac.yml` (auto-update metadata)
    
    - **Windows**:
-     - `ZoteroRAG-0.2.0-win-x64.exe` (NSIS installer)
-     - `ZoteroRAG-0.2.0-win-ia32.exe` (32-bit installer)
-     - `ZoteroRAG-0.2.0-win-x64.zip` (portable)
-     - `ZoteroRAG-0.2.0-win-ia32.zip` (portable)
+     - `RAG-Assistant-0.2.0-win-x64.exe` (NSIS installer)
+     - `RAG-Assistant-0.2.0-win-ia32.exe` (32-bit installer)
+     - `RAG-Assistant-0.2.0-win-x64.zip` (portable)
+     - `RAG-Assistant-0.2.0-win-ia32.zip` (portable)
      - `latest.yml` (auto-update metadata)
    
    - **Linux**:
-     - `ZoteroRAG-0.2.0-linux-x64.AppImage` (universal)
-     - `zotero-rag-assistant_0.2.0_amd64.deb` (Debian/Ubuntu)
-     - `ZoteroRAG-0.2.0-linux-arm64.AppImage` (ARM)
+     - `RAG-Assistant-0.2.0-linux-x64.AppImage` (universal)
+     - `RAG-Assistant-0.2.0-linux-amd64.deb` (Debian/Ubuntu)
+     - `RAG-Assistant-0.2.0-linux-arm64.AppImage` (ARM)
      - `latest-linux.yml` (auto-update metadata)
 
 4. **Automatic GitHub Release**:
@@ -202,7 +202,7 @@ git push origin v0.2.0
 
 ### 3. Monitor GitHub Actions Build
 
-1. Go to: `https://github.com/aahepburn/Zotero-RAG-Assistant/actions`
+1. Go to: `https://github.com/aahepburn/RAG-Assistant-for-Zotero/actions`
 2. Watch "Build All Platforms" workflow
 3. Verify all 3 jobs complete successfully:
    - ✅ `build-all (ubuntu-24.04)`
@@ -214,7 +214,7 @@ git push origin v0.2.0
 
 ### 4. Verify GitHub Release
 
-1. Go to: `https://github.com/aahepburn/Zotero-RAG-Assistant/releases`
+1. Go to: `https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases`
 2. Verify `v0.2.0` release exists
 3. Check all artifacts are uploaded:
    - [ ] 4 macOS files (2 DMG, 2 ZIP)
@@ -227,7 +227,7 @@ git push origin v0.2.0
 GitHub auto-generates release notes, but enhance them:
 
 ```markdown
-# Zotero RAG Assistant v0.2.0
+# RAG Assistant for Zotero v0.2.0
 
 ## 🎉 What's New
 
@@ -256,16 +256,16 @@ Windows users can now enjoy native installers and portable distributions!
 ## 📥 Installation
 
 ### macOS
-Download `ZoteroRAG-0.2.0-mac-arm64.dmg` (Apple Silicon) or `ZoteroRAG-0.2.0-mac-x64.dmg` (Intel)
+Download `RAG-Assistant-0.2.0-mac-arm64.dmg` (Apple Silicon) or `RAG-Assistant-0.2.0-mac-x64.dmg` (Intel)
 
 ### Windows
-Download `ZoteroRAG-0.2.0-win-x64.exe` and run the installer.
+Download `RAG-Assistant-0.2.0-win-x64.exe` and run the installer.
 
 **Note:** Windows SmartScreen may warn about an unrecognized app. Click "More info" → "Run anyway". The app is safe but not code-signed.
 
 ### Linux
-- **Debian/Ubuntu**: Download `zotero-rag-assistant_0.2.0_amd64.deb` and install with `sudo apt install ./zotero-rag-assistant_0.2.0_amd64.deb`
-- **Universal**: Download `ZoteroRAG-0.2.0-linux-x64.AppImage`, make executable, and run
+- **Debian/Ubuntu**: Download `RAG-Assistant-0.2.0-linux-amd64.deb` and install with `sudo apt install ./RAG-Assistant-0.2.0-linux-amd64.deb`
+- **Universal**: Download `RAG-Assistant-0.2.0-linux-x64.AppImage`, make executable, and run
 
 ## 📚 Documentation
 
@@ -394,14 +394,14 @@ Track these after release:
 ### Sample Announcement
 
 ```
-🎉 Zotero RAG Assistant v0.2.0 is now available!
+🎉 RAG Assistant for Zotero v0.2.0 is now available!
 
 New features:
 ✅ Profile-specific vector databases - no more shared paths!
 ✅ Full Windows support with native installers
 ✅ Improved profile isolation and switching
 
-Download now: https://github.com/aahepburn/Zotero-RAG-Assistant/releases/tag/v0.2.0
+Download now: https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/tag/v0.2.0
 
 Questions? Join the discussion: [link to GitHub Discussions]
 ```

@@ -9,7 +9,7 @@ const SessionHeader: React.FC = () => {
 
   useEffect(() => {
     setTitle(session?.title ?? "");
-    if (session) document.title = session.title || "Zotero RAG Assistant";
+    if (session) document.title = session.title || "RAG Assistant for Zotero";
   }, [session]);
 
   function save() {
@@ -21,7 +21,7 @@ const SessionHeader: React.FC = () => {
   if (!session) {
     return (
       <div style={{ padding: "12px 16px" }}>
-        <div className="app-heading">Zotero RAG Assistant</div>
+        <div className="app-heading">RAG Assistant for Zotero</div>
         <div className="muted">Start a new session by asking a question.</div>
       </div>
     );

@@ -85,11 +85,11 @@ const TopNav: React.FC = () => {
   const { sessions, currentSessionId, getSession, updateSessionTitle, leftCollapsed, rightCollapsed, toggleLeft, toggleRight, createSession, setCurrentSession, deleteSession } = useSessions();
   const session = currentSessionId ? getSession(currentSessionId) : null;
   const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(session?.title ?? "Zotero RAG Assistant");
+  const [title, setTitle] = useState(session?.title ?? "RAG Assistant for Zotero");
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    setTitle(session?.title ?? "Zotero RAG Assistant");
+    setTitle(session?.title ?? "RAG Assistant for Zotero");
   }, [session]);
 
   function save() {
@@ -242,7 +242,7 @@ const TopNav: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div className="top-nav__title" onDoubleClick={() => setEditing(true)}>{session?.title ?? "Zotero RAG Assistant"}</div>
+            <div className="top-nav__title" onDoubleClick={() => setEditing(true)}>{session?.title ?? "RAG Assistant for Zotero"}</div>
             {session && <button className="btn" onClick={() => setEditing(true)} title="Edit session title">Edit</button>}
           </div>
         )}

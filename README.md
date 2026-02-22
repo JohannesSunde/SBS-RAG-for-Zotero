@@ -67,13 +67,13 @@ Configure API keys in Settings for: **OpenAI**, **Anthropic**, **Google**, **Mis
 
 ### Desktop App (Recommended)
 
-Download the latest installer from [Releases](https://github.com/aahepburn/Zotero-RAG-Assistant/releases):
+Download the latest installer from [Releases](https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases):
 
 #### macOS
-1. Download `Zotero-RAG-Assistant-{version}-mac-arm64.dmg` (Apple Silicon) or `-mac-x64.dmg` (Intel)
+1. Download `RAG-Assistant-{version}-mac-arm64.dmg` (Apple Silicon) or `-mac-x64.dmg` (Intel)
 2. Open the DMG file
 3. Drag the app icon to the Applications folder
-4. Since the app isn't signed by Apple, you will need to run this command in your Terminal first: `xattr -dr com.apple.quarantine "/Applications/ZoteroRAG.app"`
+4. Since the app isn't signed by Apple, you will need to run this command in your Terminal first: `xattr -dr com.apple.quarantine "/Applications/RAG Assistant.app"`
 5. Launch from Applications or Spotlight
 
 **System Requirements:**
@@ -82,7 +82,7 @@ Download the latest installer from [Releases](https://github.com/aahepburn/Zoter
 - **Apple Silicon (M1/M2/M3) recommended** - Intel Mac builds may have limited support due to PyTorch compatibility
 
 #### Windows
-1. Download `Zotero-RAG-Assistant-{version}-win-x64.exe`
+1. Download `RAG-Assistant-{version}-win-x64.exe`
 2. Run the installer (may show SmartScreen warning on first run - click "More info" then "Run anyway")
 3. Choose installation location (default: `C:\Users\{username}\AppData\Local\Programs\`)
 4. Launch from Start Menu or desktop shortcut
@@ -99,19 +99,19 @@ First, make sure you have the necessary Python packages installed.
 sudo apt install python3 python3-pip python3-venv
 ```
 
-Download the `.deb` package from [Releases](https://github.com/aahepburn/Zotero-RAG-Assistant/releases) and install.
+Download the `.deb` package from [Releases](https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases) and install.
 
 Or, run the following commands from the terminal:
 
 ```bash
 # Download the latest .deb package (amd64)
-wget https://github.com/aahepburn/Zotero-RAG-Assistant/releases/latest/download/ZoteroRAG-{version}-linux-amd64.deb
+wget https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/latest/download/RAG-Assistant-{version}-linux-amd64.deb
 
 # Install (automatically handles dependencies)
-sudo apt install ./ZoteroRAG-{version}-linux-amd64.deb
+sudo apt install ./RAG-Assistant-{version}-linux-amd64.deb
 
 # Launch from application menu or terminal
-zotero-rag-assistant
+rag-assistant
 ```
 
 **System Requirements:** Debian/Ubuntu-based distributions (Ubuntu 18.04+, Debian 10+, or equivalent)
@@ -129,8 +129,8 @@ For development or customization:
 
 **Setup:**
 ```bash
-git clone https://github.com/aahepburn/Zotero-RAG-Assistant.git
-cd Zotero-RAG-Assistant
+git clone https://github.com/aahepburn/RAG-Assistant-for-Zotero.git
+cd RAG-Assistant-for-Zotero
 
 # Python environment
 python3 -m venv .venv

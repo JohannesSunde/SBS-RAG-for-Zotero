@@ -1,5 +1,5 @@
 """
-Provider consistency tests for Zotero RAG Assistant.
+Provider consistency tests for RAG Assistant for Zotero.
 
 Tests that all providers handle the same queries consistently and pass validation.
 """

@@ -37,7 +37,7 @@ function renderChatUI(container: HTMLElement) {
   root.className = "zotero-llm-chat-root";
 
   const header = container.ownerDocument.createElement("h2");
-  header.textContent = "Zotero RAG Assistant";
+  header.textContent = "RAG Assistant for Zotero";
 
   const form = container.ownerDocument.createElement("div");
   form.className = "zotero-llm-chat-form";

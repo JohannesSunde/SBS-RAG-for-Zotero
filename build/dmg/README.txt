@@ -1,12 +1,12 @@
-Zotero RAG Assistant - Installation Instructions
-================================================
+RAG Assistant for Zotero - Installation Instructions
+====================================================
 
-Thank you for downloading Zotero RAG Assistant!
+Thank you for downloading RAG Assistant for Zotero!
 
 INSTALLATION
 ------------
 
-1. Drag the "ZoteroRAG" app icon to the "Applications" folder
+1. Drag the "RAG Assistant" app icon to the "Applications" folder
 2. Wait for the copy to complete
 3. Eject this disk image
 
@@ -17,7 +17,7 @@ IMPORTANT: Remove macOS Quarantine
 Since this app is not signed by Apple, you must remove the quarantine flag
 before first launch. Open Terminal and run:
 
-    xattr -dr com.apple.quarantine "/Applications/ZoteroRAG.app"
+    xattr -dr com.apple.quarantine "/Applications/RAG Assistant.app"
 
 Then launch the app from Applications or Spotlight.
 
@@ -71,7 +71,7 @@ If the app doesn't launch:
 - Ensure Zotero is installed with a synced library
 
 For more help, visit:
-https://github.com/aahepburn/Zotero-RAG-Assistant/issues
+https://github.com/aahepburn/RAG-Assistant-for-Zotero/issues
 
 
 LICENSE

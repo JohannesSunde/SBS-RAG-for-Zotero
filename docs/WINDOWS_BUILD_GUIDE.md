@@ -1,6 +1,6 @@
 # Windows Build Guide
 
-Complete guide for building Zotero RAG Assistant on Windows.
+Complete guide for building RAG Assistant for Zotero on Windows.
 
 ## Prerequisites
 
@@ -46,8 +46,8 @@ Complete guide for building Zotero RAG Assistant on Windows.
 
 ```powershell
 # Clone the repository
-git clone https://github.com/aahepburn/Zotero-RAG-Assistant.git
-cd Zotero-RAG-Assistant
+git clone https://github.com/aahepburn/RAG-Assistant-for-Zotero.git
+cd RAG-Assistant-for-Zotero
 ```
 
 ### Step 2: Install Node Dependencies
@@ -124,10 +124,10 @@ npm run package:win
 ```
 
 **This creates:**
-- `release/ZoteroRAG-{version}-win-x64.exe` - NSIS installer (64-bit)
-- `release/ZoteroRAG-{version}-win-ia32.exe` - NSIS installer (32-bit)
-- `release/ZoteroRAG-{version}-win-x64.zip` - Portable ZIP (64-bit)
-- `release/ZoteroRAG-{version}-win-ia32.zip` - Portable ZIP (32-bit)
+- `release/RAG-Assistant-{version}-win-x64.exe` - NSIS installer (64-bit)
+- `release/RAG-Assistant-{version}-win-ia32.exe` - NSIS installer (32-bit)
+- `release/RAG-Assistant-{version}-win-x64.zip` - Portable ZIP (64-bit)
+- `release/RAG-Assistant-{version}-win-ia32.zip` - Portable ZIP (32-bit)
 - `release/latest.yml` - Auto-update configuration
 
 **Build time:** 2-5 minutes
@@ -149,11 +149,11 @@ Get-ChildItem python-dist\backend_server.exe
 **Option 1: Run from build artifacts**
 ```powershell
 # Install the NSIS installer
-.\release\ZoteroRAG-{version}-win-x64.exe
+.\release\RAG-Assistant-{version}-win-x64.exe
 
 # Or extract and run the portable version
-Expand-Archive .\release\ZoteroRAG-{version}-win-x64.zip -DestinationPath test-install
-.\test-install\ZoteroRAG.exe
+Expand-Archive .\release\RAG-Assistant-{version}-win-x64.zip -DestinationPath test-install
+.\test-install\RAGAssistant.exe
 ```
 
 **Option 2: Test in development mode**

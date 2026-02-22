@@ -395,12 +395,12 @@ const Settings: React.FC = () => {
         <section className="settings-section">
           <h2 className="settings-section-title">Support & Feedback</h2>
           <p className="settings-section-description">
-            Help improve Zotero RAG Assistant by reporting bugs or supporting the project.
+            Help improve RAG Assistant for Zotero by reporting bugs or supporting the project.
           </p>
           
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }}>
             <Button
-              onClick={() => window.open('https://github.com/aahepburn/Zotero-RAG-Assistant/issues/new', '_blank', 'noopener,noreferrer')}
+              onClick={() => window.open('https://github.com/aahepburn/RAG-Assistant-for-Zotero/issues/new', '_blank', 'noopener,noreferrer')}
               variant="secondary"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
@@ -619,7 +619,7 @@ const Settings: React.FC = () => {
                     Version {updater.updateInfo.version} is available. To update, please download the new release file manually from GitHub Releases.
                   </p>
                   <Button
-                    onClick={() => window.electron?.openExternal('https://github.com/aahepburn/Zotero-RAG-Assistant/releases/latest')}
+                    onClick={() => window.electron?.openExternal('https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/latest')}
                     variant="primary"
                     style={{ marginTop: '8px' }}
                   >
@@ -638,7 +638,7 @@ const Settings: React.FC = () => {
               }}>
                 <strong>Note:</strong> Automatic updates are disabled. When a new version is available, you'll need to download and install it manually from{' '}
                 <a 
-                  href="https://github.com/aahepburn/Zotero-RAG-Assistant/releases" 
+                  href="https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   style={{ color: 'var(--accent, #007bff)', textDecoration: 'underline' }}

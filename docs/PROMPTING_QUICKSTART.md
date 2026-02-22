@@ -2,7 +2,7 @@
 
 ## What Changed?
 
-Your Zotero RAG Assistant now uses **2025 best practices** for academic question answering, including:
+RAG Assistant for Zotero now uses **2025 best practices** for academic question answering, including:
 -  Better citation accuracy (every claim is cited)
 -  Clearer distinction between facts and analysis
 -  Improved handling of uncertainty
