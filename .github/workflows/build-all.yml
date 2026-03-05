@@ -20,9 +20,6 @@ jobs:
         include:
           - os: ubuntu-24.04
             name: linux
-          - os: macos-15-intel  # Intel x64
-            name: macos
-            arch: x64
           - os: macos-14  # Apple Silicon arm64
             name: macos
             arch: arm64
@@ -55,21 +52,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install pyinstaller
-          
-          # Handle Intel Mac (x64) PyTorch compatibility
-          # PyTorch 2.6+ required for security (CVE-2025-32434) but no x64 wheels available
-          # Intel runners use 2.2.2 (last version with x64 support) for build only
-          # Built app uses safetensors which mitigates the vulnerability
-          if [ "$(uname -m)" = "x86_64" ]; then
-            echo "Intel Mac detected - using PyTorch 2.2.2 for x64 compatibility"
-            python3 -m pip install torch==2.2.2
-            # Install requirements but skip torch (already installed)
-            grep -v "^torch" requirements.txt > requirements-no-torch.txt
-            python3 -m pip install -r requirements-no-torch.txt
-          else
-            echo "Apple Silicon detected - using standard requirements"
-            python3 -m pip install -r requirements.txt
-          fi
+          python3 -m pip install -r requirements.txt
           
           # Build PyInstaller bundle (will build for native architecture of runner)
           echo "Building for ${{ matrix.arch }} architecture on $(uname -m) runner"
@@ -116,7 +99,6 @@ jobs:
             echo ""
             echo "Verifying architecture..."
             file python-dist/backend_server
-            echo "Note: Built on Apple Silicon (arm64). Intel Macs will run via Rosetta 2."
           else
             echo "✗ Backend executable not found!"
             exit 1
@@ -261,32 +243,12 @@ jobs:
       - name: Display structure
         run: ls -R artifacts
 
-      - name: Setup Node.js for merge script
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install js-yaml
-        run: npm install js-yaml
-
-      - name: Merge macOS update manifests
-        run: |
-          node scripts/merge-mac-yml.js \
-            artifacts/macos-x64-installers/latest-mac.yml \
-            artifacts/macos-arm64-installers/latest-mac.yml \
-            artifacts/latest-mac.yml
-          echo "Merged latest-mac.yml created"
-          cat artifacts/latest-mac.yml
-
       - name: Consolidate all release files
         run: |
           mkdir -p artifacts/release
-          # Move merged yml
-          mv artifacts/latest-mac.yml artifacts/release/
-          # Move macOS installers (removing individual yml files first)
-          rm -f artifacts/macos-x64-installers/latest-mac.yml
-          rm -f artifacts/macos-arm64-installers/latest-mac.yml
-          mv artifacts/macos-x64-installers/* artifacts/release/ || true
+          # Move macOS latest-mac.yml (from arm64 build only)
+          mv artifacts/macos-arm64-installers/latest-mac.yml artifacts/release/
+          # Move macOS installers
           mv artifacts/macos-arm64-installers/* artifacts/release/ || true
           # Move Windows and Linux artifacts
           mv artifacts/windows-installers/* artifacts/release/ || true
