@@ -20,7 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **License Inclusion**: macOS DMG now includes correct Apache 2.0 license file (was incorrectly showing MIT)
+- **DMG Installation Files**: Fixed macOS DMG to include Applications folder link, Installation Instructions, and LICENSE file
 - **Sound Notifications**: Fixed TypeScript errors preventing sound notification settings from saving properly
+
+### Removed
+- **Intel Mac Builds**: Removed x64 (Intel) macOS builds - now only building for Apple Silicon (arm64)
+  - Intel Macs can still run the app via Rosetta 2
 
 ## [0.4.3] - 2026-02-22
 
