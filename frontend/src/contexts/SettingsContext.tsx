@@ -32,6 +32,7 @@ export interface Settings {
   activeModel: string;
   embeddingModel: string;
   zoteroPath: string;
+  pdfStoragePath?: string;
   chromaPath: string;
   providers: Record<string, ProviderConfig>;
   showSystemNotification?: boolean;
@@ -52,6 +53,7 @@ const defaultSettings: Settings = {
   activeModel: '',
   embeddingModel: 'bge-base',
   zoteroPath: '',
+  pdfStoragePath: '',
   chromaPath: '',
   showSystemNotification: true,
   playSoundNotification: false,

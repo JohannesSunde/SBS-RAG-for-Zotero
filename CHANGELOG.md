@@ -7,25 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.5] - 2026-03-05
+## [0.4.5] - 2026-03-22
 
 ### Added
 - **Custom Endpoint Support**: OpenAI-compatible providers (OpenAI, Mistral, Groq, OpenRouter) now support optional custom endpoint configuration
   - Enables Azure OpenAI, proxy servers, and custom deployments
   - Backward compatible: defaults to standard endpoints when not configured
+- **Startup Progress Indicator**: Application now displays a splash screen immediately on launch with progress updates
+  - Shows real-time progress during first-run AI model downloads
+  - Prevents users from launching multiple instances due to apparent unresponsiveness
+- **Custom PDF Storage Directory**: New optional setting to specify a custom Zotero PDF storage folder
+  - Useful when PDFs are stored on a separate drive or non-default location
+  - Leave blank to use the default location next to the database file
+- **Semantic Scholar Search**: Added Semantic Scholar search button alongside existing Google Scholar button in the Sources panel
+- **Package Manager Distribution**: Added documentation for Homebrew tap (macOS) and winget (Windows) distribution
 
 ### Changed
 - **Save & Test Button**: API key testing now automatically saves settings first, eliminating "test failed because you didn't save" confusion
 - **Update Notice UX**: Manual update notification now displays in reassuring green with clear messaging that profiles, embeddings, and settings persist across updates
+- **Windows Startup Wait**: Increased initial process-alive check delay to 3s on Windows (vs 1.5s elsewhere) to accommodate PyInstaller self-extraction time
+- **Ollama Status Indicator**: Removed the Ollama status indicator from the top navigation bar for a cleaner interface
 
 ### Fixed
+- **Syncing Stuck at 0%**: Improved error detection and messaging when Zotero database is locked
+  - Now shows specific message: "Database is locked — please close Zotero completely before syncing"
+  - Network/process failures during sync now display a visible error message instead of silently disappearing
+- **Custom Model List (OpenAI)**: Fixed bug where all curated GPT models were returned regardless of what the API actually provides
+  - Model list now accurately reflects only models available on your account
+  - Changing API key or base URL now clears the cached model list, triggering a fresh fetch
 - **License Inclusion**: macOS DMG now includes correct Apache 2.0 license file (was incorrectly showing MIT)
 - **DMG Installation Files**: Fixed macOS DMG to include Applications folder link, Installation Instructions, and LICENSE file
 - **Sound Notifications**: Fixed TypeScript errors preventing sound notification settings from saving properly
+- **Windows Port Cleanup**: Port cleanup on startup now verifies process name before killing, preventing accidental termination of unrelated applications on ports 8000–8010
 
 ### Removed
 - **Intel Mac Builds**: Removed x64 (Intel) macOS builds - now only building for Apple Silicon (arm64)
   - Intel Macs can still run the app via Rosetta 2
+- **Windows 32-bit (ia32) Builds**: Removed ia32 build targets — only x64 is supported, consistent with the 64-bit PyInstaller backend
 
 ## [0.4.3] - 2026-02-22
 
@@ -566,7 +584,7 @@ This is the standard approach for macOS apps as the industry transitions to Appl
 
 Previous versions were web-based only, requiring manual setup of Python backend and Node.js frontend.
 
-See git history for details: https://github.com/aahepburn/zotero-llm-plugin/commits/master
+See git history for details: https://github.com/aahepburn/RAG-Assistant-for-Zotero/commits/master
 
 ---
 

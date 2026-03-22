@@ -38,7 +38,7 @@ For a complete release that supports auto-updates:
    ```
 
 4. **Create GitHub Release**:
-   - Go to: https://github.com/aahepburn/zotero-llm-plugin/releases/new
+   - Go to: https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases/new
    - Select tag `v0.1.1`
    - Title: `v0.1.1 - Description`
    - Upload all files from `release/` directory:
@@ -99,7 +99,7 @@ This is more reliable but increases app size.
 ## Directory Structure
 
 ```
-zotero-llm-plugin/
+RAG-Assistant-for-Zotero/
  electron/              # Electron main process
     main.ts           # Main process logic
     preload.ts        # Preload script (context bridge)
@@ -358,6 +358,6 @@ app.on('open-url', (event, url) => {
 
 ## Getting Help
 
-- **Issues**: https://github.com/aahepburn/zotero-llm-plugin/issues
-- **Discussions**: https://github.com/aahepburn/zotero-llm-plugin/discussions
+- **Issues**: https://github.com/aahepburn/RAG-Assistant-for-Zotero/issues
+- **Discussions**: https://github.com/aahepburn/RAG-Assistant-for-Zotero/discussions
 - **Electron Discord**: https://discord.gg/electron

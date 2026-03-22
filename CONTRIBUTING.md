@@ -5,7 +5,7 @@ Contributions are welcome. Please follow these guidelines to keep the project ma
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/zotero-llm-plugin.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/RAG-Assistant-for-Zotero.git`
 3. Set up the development environment:
    ```bash
    ./setup.sh

@@ -50,7 +50,10 @@ class MistralProvider(BaseProvider):
             raise ProviderAuthenticationError("Mistral API key is required")
         
         # Support custom endpoints (e.g., for proxies or custom deployments)
-        base_url = credentials.get("base_url", "https://api.mistral.ai/v1")
+        # Only use custom base_url if non-empty and non-whitespace
+        base_url = credentials.get("base_url", "").strip()
+        if not base_url:
+            base_url = "https://api.mistral.ai/v1"
         
         return OpenAI(
             api_key=api_key,
@@ -84,7 +87,12 @@ class MistralProvider(BaseProvider):
                     context_length=128000 if "large" in model.id.lower() else 32000
                 )
                 for model in models_response.data
+                if model.id  # Skip models without IDs
             ]
+            
+            # Warn if no models found
+            if not models:
+                print(f"[Mistral Provider] WARNING: No models returned from endpoint")
             
             for model in models:
                 print(f"[Mistral Provider]   Found: {model.id}")
@@ -683,6 +691,11 @@ class GroqProvider(BaseProvider):
         
         # Support custom endpoints (e.g., for proxies or custom deployments)
         base_url = credentials.get("base_url", "https://api.groq.com/openai/v1")
+        # Edge case: if base_url is empty string or whitespace, use default
+        if isinstance(base_url, str):
+            base_url = base_url.strip()
+        if not base_url:
+            base_url = "https://api.groq.com/openai/v1"
         
         return OpenAI(
             api_key=api_key,
@@ -716,7 +729,12 @@ class GroqProvider(BaseProvider):
                     context_length=32768
                 )
                 for model in models_response.data
+                if model.id  # Edge case: skip models without IDs
             ]
+            
+            # Edge case: warn if no models returned
+            if not models:
+                print(f"[Groq Provider] WARNING: No models returned from endpoint")
             
             for model in models:
                 print(f"[Groq Provider]   Found: {model.id}")
@@ -862,6 +880,11 @@ class OpenRouterProvider(BaseProvider):
         
         # Support custom endpoints (e.g., for proxies or custom deployments)
         base_url = credentials.get("base_url", "https://openrouter.ai/api/v1")
+        # Edge case: if base_url is empty string or whitespace, use default
+        if isinstance(base_url, str):
+            base_url = base_url.strip()
+        if not base_url:
+            base_url = "https://openrouter.ai/api/v1"
         
         return OpenAI(
             api_key=api_key,
@@ -896,7 +919,12 @@ class OpenRouterProvider(BaseProvider):
                     context_length=None
                 )
                 for model in models_response.data[:30]
+                if model.id  # Edge case: skip models without IDs
             ]
+            
+            # Edge case: warn if no models returned
+            if not models:
+                print(f"[OpenRouter Provider] WARNING: No models returned from endpoint")
             
             for model in models[:10]:  # Log first 10
                 print(f"[OpenRouter Provider]   Found: {model.id}")

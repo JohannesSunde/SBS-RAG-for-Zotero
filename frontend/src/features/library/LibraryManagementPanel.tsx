@@ -13,6 +13,7 @@ interface IndexProgress {
   skipped_items?: number;
   skip_reasons?: string[];
   mode?: 'incremental' | 'full';
+  error?: string | null;  // Fatal error that stopped indexing
 }
 
 interface IndexStatus {
@@ -148,7 +149,7 @@ const LibraryManagementPanel: React.FC = () => {
       console.error("Indexing request failed", e);
       setIndexing(false);
       indexingRef.current = false;
-      setIndexStatus({ status: 'error', progress: undefined });
+      setIndexStatus({ status: 'error', progress: { error: 'Sync failed — check that Zotero is closed and try again.' } });
     }
   };
 
@@ -371,7 +372,7 @@ const LibraryManagementPanel: React.FC = () => {
           </div>
 
           {/* Progress Display */}
-          {indexStatus && indexStatus.status === 'indexing' && indexStatus.progress && (
+          {indexStatus && indexStatus.status === 'indexing' && indexStatus.progress && !indexStatus.progress.error && (
             <div className="indexing-progress">
               <div className="progress-header">
                 <span className="progress-label">
@@ -405,6 +406,13 @@ const LibraryManagementPanel: React.FC = () => {
                   <span> ({indexStatus.progress.skipped_items} already indexed)</span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {indexStatus && indexStatus.progress?.error && (
+            <div className="error-banner" style={{ marginTop: '14px', marginBottom: '10px' }}>
+              <strong>Indexing Failed:</strong> {indexStatus.progress.error}
             </div>
           )}
 

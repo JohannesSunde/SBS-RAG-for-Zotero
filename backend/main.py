@@ -300,7 +300,8 @@ def initialize_chatbot():
         active_provider_id=settings.get("activeProviderId", "ollama"),
         active_model=settings.get("activeModel"),
         credentials=provider_credentials,
-        embedding_model_id=settings.get("embeddingModel", "bge-base")
+        embedding_model_id=settings.get("embeddingModel", "bge-base"),
+        storage_path=settings.get("pdfStoragePath") or None
     )
 
 chatbot = initialize_chatbot()

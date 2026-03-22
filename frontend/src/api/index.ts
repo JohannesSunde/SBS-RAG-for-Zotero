@@ -2,7 +2,16 @@ import { request } from "./client";
 
 export type IndexStatus = {
   status: string;
-  progress?: { processed_items?: number; total_items?: number };
+  progress?: {
+    processed_items?: number;
+    total_items?: number;
+    elapsed_seconds?: number;
+    eta_seconds?: number | null;
+    skipped_items?: number;
+    skip_reasons?: string[];
+    mode?: 'incremental' | 'full';
+    error?: string | null;
+  };
 };
 
 export async function indexLibrary(): Promise<{ msg?: string }>{

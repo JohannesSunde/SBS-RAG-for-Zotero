@@ -7,8 +7,9 @@ from backend.zoteroitem import ZoteroItem
 from pathlib import Path
 
 class ZoteroLibrary:
-    def __init__(self, db_path):
+    def __init__(self, db_path, storage_path=None):
         self.db_path = db_path
+        self.storage_path = storage_path
         self._local = threading.local()
         self._lock = threading.Lock()
     
@@ -144,7 +145,7 @@ class ZoteroLibrary:
         # Use cross-platform path relative to Zotero database location
         # The storage directory is typically at the same level as the database
         db_parent = Path(self.db_path).parent
-        storage_dir = str(db_parent / "storage")
+        storage_dir = self.storage_path if self.storage_path else str(db_parent / "storage")
         zotero_items = []
 
         for item in results:

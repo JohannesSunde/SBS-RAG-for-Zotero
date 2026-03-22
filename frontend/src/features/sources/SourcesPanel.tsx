@@ -206,13 +206,15 @@ const SourcesPanel: React.FC = () => {
                 <a 
                   title="Semantic Scholar" 
                   className="btn"
-                  href={`https://www.semanticscholar.org/search?q=${encodeURIComponent(source.title)}`}
+                  href={`https://www.semanticscholar.org/search?q=${encodeURIComponent(source.title)}&sort=Relevance`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="4" r="2" stroke="currentColor" strokeWidth="1.75"/>
+                    <circle cx="4" cy="20" r="2" stroke="currentColor" strokeWidth="1.75"/>
+                    <circle cx="20" cy="20" r="2" stroke="currentColor" strokeWidth="1.75"/>
+                    <path d="M11 6L5 18M13 6l6 12M6 20h12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
                   </svg>
                 </a>
                 

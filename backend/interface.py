@@ -35,9 +35,10 @@ class ZoteroChatbot:
         active_provider_id="ollama",
         active_model=None,
         credentials=None,
-        embedding_model_id="bge-base"
+        embedding_model_id="bge-base",
+        storage_path=None
     ):
-        self.zlib = ZoteroLibrary(db_path)
+        self.zlib = ZoteroLibrary(db_path, storage_path=storage_path)
         self.embedding_model_id = embedding_model_id
         # Pass embedding model ID to ChromaClient so it creates model-specific collections
         self.chroma = ChromaClient(chroma_path, embedding_model_id=embedding_model_id)
@@ -67,6 +68,7 @@ class ZoteroChatbot:
             "elapsed_seconds": 0,
             "skip_reasons": [],  # Track why items are skipped
             "eta_seconds": None,
+            "error": None,  # Fatal error that stopped indexing
         }
         self._index_thread = None
     
@@ -182,9 +184,27 @@ class ZoteroChatbot:
             start_time = time.time()
             self.index_progress["start_time"] = start_time
             
-            raw_items = self.zlib.search_parent_items_with_pdfs()
+            # Validate database access before starting
+            try:
+                raw_items = self.zlib.search_parent_items_with_pdfs()
+            except Exception as e:
+                error_str = str(e)
+                if "database is locked" in error_str.lower():
+                    error_msg = "Database is locked — please close Zotero completely before syncing."
+                else:
+                    error_msg = f"Failed to access Zotero database: {error_str}"
+                print(f"FATAL ERROR: {error_msg}")
+                self.index_progress["error"] = error_msg
+                return
+            
             self.index_progress["total_items"] = len(raw_items)
             self.index_progress["processed_items"] = 0
+            
+            if len(raw_items) == 0:
+                self.index_progress["error"] = "No items with PDFs found in Zotero library"
+                print("WARNING: No items with PDFs found")
+                return
+            
             items = [ZoteroItem(filepath=it['pdf_path'], metadata=it) for it in raw_items]
 
             # Extract text for each item using PDF logic with page numbers
@@ -330,11 +350,28 @@ class ZoteroChatbot:
             print(f"Total items attempted: {self.index_progress['total_items']}")
             print(f"Successfully indexed: {successful_items}")
             print(f"Skipped/Failed: {len(self.index_progress.get('skip_reasons', []))}")
+            
+            # Check if ALL items failed
+            if successful_items == 0 and self.index_progress['total_items'] > 0:
+                error_msg = f"All {self.index_progress['total_items']} items failed to index. Common causes: PDFs not found (check storage path), network drive issues, or file permissions."
+                print(f"FATAL ERROR: {error_msg}")
+                self.index_progress["error"] = error_msg
+            
             if self.index_progress.get('skip_reasons'):
                 print(f"\\nSkip reasons:")
-                for reason in self.index_progress['skip_reasons']:
+                for reason in self.index_progress['skip_reasons'][:10]:  # Show first 10
                     print(f"  - {reason}")
+                if len(self.index_progress['skip_reasons']) > 10:
+                    print(f"  ... and {len(self.index_progress['skip_reasons']) - 10} more")
             print(f"=============================\\n")
+        except Exception as e:
+            # Catch any unexpected exceptions at thread level
+            import traceback
+            error_msg = f"Indexing crashed: {str(e)}"
+            traceback_str = traceback.format_exc()
+            print(f"FATAL ERROR: {error_msg}")
+            print(f"Traceback:\\n{traceback_str}")
+            self.index_progress["error"] = error_msg
         finally:
             self.is_indexing = False
             self._cancel_indexing = False
@@ -345,8 +382,19 @@ class ZoteroChatbot:
             start_time = time.time()
             self.index_progress["start_time"] = start_time
             
-            # Get all items from Zotero
-            raw_items = self.zlib.search_parent_items_with_pdfs()
+            # Validate database access before starting
+            try:
+                raw_items = self.zlib.search_parent_items_with_pdfs()
+            except Exception as e:
+                error_str = str(e)
+                if "database is locked" in error_str.lower():
+                    error_msg = "Database is locked — please close Zotero completely before syncing."
+                else:
+                    error_msg = f"Failed to access Zotero database: {error_str}"
+                print(f"FATAL ERROR: {error_msg}")
+                self.index_progress["error"] = error_msg
+                return
+            
             all_item_ids = {str(it['item_id']) for it in raw_items}
             
             # Get already indexed item IDs
@@ -504,11 +552,28 @@ class ZoteroChatbot:
             print(f"Total items attempted: {self.index_progress['total_items']}")
             print(f"Successfully indexed: {successful_items}")
             print(f"Skipped/Failed: {len(self.index_progress.get('skip_reasons', []))}")
+            
+            # Check if ALL new items failed
+            if successful_items == 0 and self.index_progress['total_items'] > 0:
+                error_msg = f"All {self.index_progress['total_items']} new items failed to index. Common causes: PDFs not found (check storage path), network drive issues, or file permissions."
+                print(f"FATAL ERROR: {error_msg}")
+                self.index_progress["error"] = error_msg
+            
             if self.index_progress.get('skip_reasons'):
                 print(f"\nSkip reasons:")
-                for reason in self.index_progress['skip_reasons']:
+                for reason in self.index_progress['skip_reasons'][:10]:  # Show first 10
                     print(f"  - {reason}")
+                if len(self.index_progress['skip_reasons']) > 10:
+                    print(f"  ... and {len(self.index_progress['skip_reasons']) - 10} more")
             print(f"========================\n")
+        except Exception as e:
+            # Catch any unexpected exceptions at thread level
+            import traceback
+            error_msg = f"Indexing crashed: {str(e)}"
+            traceback_str = traceback.format_exc()
+            print(f"FATAL ERROR: {error_msg}")
+            print(f"Traceback:\n{traceback_str}")
+            self.index_progress["error"] = error_msg
         finally:
             self.is_indexing = False
             self._cancel_indexing = False
@@ -533,6 +598,7 @@ class ZoteroChatbot:
             "skipped_items": 0,
             "mode": "incremental" if incremental else "full",
             "skip_reasons": [],
+            "error": None,  # Clear any previous errors
         }
         
         # Choose worker based on mode

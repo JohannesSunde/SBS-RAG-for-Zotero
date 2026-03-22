@@ -32,6 +32,7 @@ let isInitializing = true; // Prevent premature quit during startup
 let isShuttingDown = false; // FIX: Prevent duplicate shutdown attempts
 let updateDownloaded = false;
 let updateInfo: { version: string; releaseNotes?: string } | null = null;
+let splashWindow: BrowserWindow | null = null; // Splash screen shown during startup
 
 /**
  * Handle command-line arguments for Linux compatibility
@@ -275,8 +276,11 @@ async function killExistingBackendProcesses(): Promise<void> {
         }
       }
     } else if (process.platform === 'win32') {
-      // Windows: Use netstat to find and kill processes
+      // Windows: Use netstat to find PIDs on our ports, then verify they are our
+      // backend process before killing (to avoid killing unrelated servers).
       const { execSync } = require('child_process');
+      const appProcessNames = ['backend_server', 'uvicorn', 'zotero-rag', 'python'];
+
       for (let port = 8000; port <= 8010; port++) {
         try {
           const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf-8' });
@@ -295,6 +299,13 @@ async function killExistingBackendProcesses(): Promise<void> {
             console.log(`Found ${pids.size} process(es) using port ${port}: ${Array.from(pids).join(', ')}`);
             for (const pid of pids) {
               try {
+                // Verify it's our process before killing
+                const taskInfo = execSync(`tasklist /FI "PID eq ${pid}" /FO CSV /NH`, { encoding: 'utf-8' }).toLowerCase();
+                const isOurProcess = appProcessNames.some(name => taskInfo.includes(name));
+                if (!isOurProcess) {
+                  console.log(`  ⚠ Skipping PID ${pid} — not a known backend process`);
+                  continue;
+                }
                 execSync(`taskkill /F /PID ${pid}`);
                 console.log(`  ✓ Killed process ${pid}`);
               } catch (e) {
@@ -828,11 +839,17 @@ async function getBackendPath(): Promise<{ command: string; args: string[]; cwd:
 
 /**
  * Check if the backend is ready by polling the health endpoint
+ * @param maxRetries - Maximum number of health check attempts
+ * @param delayMs - Delay between attempts
+ * @param modelDownloadInProgress - Callback to check if model download is happening (extends timeout)
  */
-async function waitForBackend(maxRetries = 30, delayMs = 1000): Promise<boolean> {
+async function waitForBackend(maxRetries = 30, delayMs = 1000, modelDownloadInProgress?: () => boolean): Promise<boolean> {
   console.log(`Waiting for backend to be ready (checking ${BACKEND_URL}/health)...`);
   
-  for (let i = 0; i < maxRetries; i++) {
+  let attempts = 0;
+  const startTime = Date.now();
+  
+  while (attempts < maxRetries) {
     try {
       // Use generous timeout as connections can be slower on first startup
       // especially with indexing or slow disk I/O
@@ -857,9 +874,20 @@ async function waitForBackend(maxRetries = 30, delayMs = 1000): Promise<boolean>
       }
     } catch (error) {
       // Backend not ready yet - only log every 5 attempts to reduce noise
-      if ((i + 1) % 5 === 0) {
-        console.log(`  Attempt ${i + 1}/${maxRetries}: Backend not responding yet...`);
+      if ((attempts + 1) % 5 === 0) {
+        console.log(`  Attempt ${attempts + 1}/${maxRetries}: Backend not responding yet...`);
       }
+      
+      // If model download is in progress, don't count against max retries
+      // This prevents timeout during lengthy first-run model downloads
+      if (modelDownloadInProgress && modelDownloadInProgress()) {
+        const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+        console.log(`  Model download in progress (${elapsedSeconds}s elapsed) - extending timeout...`);
+        // Don't increment attempts counter, but still wait
+      } else {
+        attempts++;
+      }
+      
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
@@ -877,11 +905,15 @@ async function waitForBackend(maxRetries = 30, delayMs = 1000): Promise<boolean>
  * Spawn the Python backend process
  */
 async function startBackend(): Promise<boolean> {
+  // Create splash window immediately for visual feedback
+  splashWindow = createLoadingWindow('Starting RAG Assistant...');
+  
   // Kill any existing backend processes before starting
   await killExistingBackendProcesses();
   
   // Find an available port
   console.log(`Checking port availability (preferred: ${BACKEND_PORT})...`);
+  updateLoadingWindow(splashWindow, 'Checking port availability...');
   const availablePort = await findAvailablePort(BACKEND_PORT);
   if (!availablePort) {
     console.error('================================================================================');
@@ -1045,6 +1077,12 @@ async function startBackend(): Promise<boolean> {
     let backendOutput: string[] = [];
     let backendErrors: string[] = [];
     
+    // Track model download progress
+    let modelDownloadInProgress = false;
+    let lastModelDownloadTime = 0;
+    let currentDownloadFile = '';
+    let currentDownloadProgress = 0;
+    
     // Enhanced environment for backend process
     const backendEnv = {
       ...process.env,
@@ -1146,6 +1184,29 @@ async function startBackend(): Promise<boolean> {
         backendErrors.push(output);
         const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
         
+        // Parse model download progress (tqdm format: "filename: XX%|####...")
+        const downloadMatch = output.match(/^([\w\.\-]+):\s+(\d+)%\|/);
+        if (downloadMatch) {
+          const filename = downloadMatch[1];
+          const progress = parseInt(downloadMatch[2]);
+          
+          modelDownloadInProgress = true;
+          lastModelDownloadTime = Date.now();
+          currentDownloadFile = filename;
+          currentDownloadProgress = progress;
+          
+          // Update splash window with download progress
+          const message = `Downloading AI model: ${filename}`;
+          console.log(`[Model Download ${timestamp}] ${filename}: ${progress}%`);
+          updateLoadingWindow(splashWindow, message, progress);
+        }
+        // Check if download just started (0% or initial)
+        else if (output.match(/^([\w\.\-]+):\s+0%|^(config\.json|model\.safetensors|tokenizer)/)) {
+          modelDownloadInProgress = true;
+          lastModelDownloadTime = Date.now();
+          updateLoadingWindow(splashWindow, 'Initializing AI model download...');
+        }
+        
         // Some stderr output is just warnings, not fatal errors
         if (output.includes('WARNING') || output.includes('DeprecationWarning')) {
           console.warn(`[Backend Warning ${timestamp}] ${output}`);
@@ -1232,7 +1293,9 @@ async function startBackend(): Promise<boolean> {
       console.log('Waiting for immediate startup errors...');
       
       // Wait a moment for immediate errors
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Windows + PyInstaller needs more time for extraction before the process is stable
+      const startupWaitMs = process.platform === 'win32' ? 3000 : 1500;
+      await new Promise(resolve => setTimeout(resolve, startupWaitMs));
       
       const processExited = !backendProcess || backendProcess.killed || backendProcess.exitCode !== null;
       
@@ -1272,20 +1335,35 @@ async function startBackend(): Promise<boolean> {
         
         errorSummary += `Error output:\n${backendErrors.slice(0, 10).join('\n').substring(0, 500)}`;
         
+        // Close splash window before showing error dialog
+        if (splashWindow && !splashWindow.isDestroyed()) {
+          splashWindow.close();
+          splashWindow = null;
+        }
+        
         dialog.showErrorBox('Backend Startup Failed', errorSummary);
         return false;
       }
     }
     
     console.log('✓ Process check passed, checking health endpoint...');
+    updateLoadingWindow(splashWindow, 'Starting backend service...');
+    
+    // Function to check if model download is still happening
+    // Consider download active if we saw progress in last 30 seconds
+    const isModelDownloading = () => {
+      const timeSinceLastProgress = Date.now() - lastModelDownloadTime;
+      return modelDownloadInProgress && timeSinceLastProgress < 30000;
+    };
     
     // Wait for backend to be ready with retry logic
     // Use generous timeouts as initialization can be slow (especially on first run with indexing)
-    // Try moderate checks first (1000ms delay), then slower checks (3000ms delay)
-    let isReady = await waitForBackend(30, 1000);  // Increased from 10 to 30 for Remote Desktop environments
+    // The model download callback will extend timeout indefinitely while downloads are active
+    let isReady = await waitForBackend(30, 1000, isModelDownloading);  // Pass download check
     if (!isReady) {
       console.log('Initial startup phase incomplete, continuing with longer intervals (3000ms)...');
-      isReady = await waitForBackend(20, 3000);  // Give plenty of time for initialization
+      updateLoadingWindow(splashWindow, 'Continuing initialization...');
+      isReady = await waitForBackend(20, 3000, isModelDownloading);  // Pass download check
       
       // If still not ready, dump comprehensive diagnostics
       if (!isReady) {
@@ -1315,8 +1393,19 @@ async function startBackend(): Promise<boolean> {
         
         errorMessage += `Recent errors:\n${allErrors.substring(allErrors.length - 400)}`;
         
+        // Close splash window before showing error dialog
+        if (splashWindow && !splashWindow.isDestroyed()) {
+          splashWindow.close();
+          splashWindow = null;
+        }
+        
         dialog.showErrorBox('Backend Failed to Start', errorMessage);
       }
+    }
+    
+    if (isReady) {
+      console.log('✓ Backend is ready!');
+      updateLoadingWindow(splashWindow, 'Backend ready! Loading application...');
     }
     
     return isReady;
@@ -1326,6 +1415,13 @@ async function startBackend(): Promise<boolean> {
     console.error('✗ EXCEPTION in startBackend:');
     console.error(error);
     console.error('================================================================================');
+    
+    // Close splash window on error
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.close();
+      splashWindow = null;
+    }
+    
     return false;
   }
 }
@@ -1580,6 +1676,15 @@ function createWindow(): void {
   
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+  
+  // Close splash window when main window is ready
+  mainWindow.webContents.once('did-finish-load', () => {
+    console.log('✓ Main window loaded, closing splash screen');
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.close();
+      splashWindow = null;
+    }
   });
   
   // Handle renderer process crashes (critical for Linux stability)

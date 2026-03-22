@@ -231,11 +231,11 @@ npm install electron-builder --save-dev
 
 **Application won't start**
 - Check Event Viewer for crash details:
-  - Windows Logs → Application → Look for ZoteroRAG errors
+  - Windows Logs → Application → Look for RAG Assistant errors
 - Try running from command line to see errors:
   ```powershell
-  cd "C:\Users\{username}\AppData\Local\Programs\ZoteroRAG"
-  .\ZoteroRAG.exe
+  cd "C:\Users\{username}\AppData\Local\Programs\RAG Assistant"
+  .\RAG Assistant.exe
   ```
 
 ## Development Workflow

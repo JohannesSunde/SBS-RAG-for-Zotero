@@ -40,8 +40,9 @@ class OpenAIProvider(BaseProvider):
         if not api_key:
             raise ProviderAuthenticationError("OpenAI API key is required")
         
-        base_url = credentials.get("base_url")  # For custom endpoints
-        return OpenAI(api_key=api_key, base_url=base_url)
+        # For custom endpoints - only use if non-empty and non-whitespace
+        base_url = credentials.get("base_url", "").strip()
+        return OpenAI(api_key=api_key, base_url=base_url if base_url else None)
     
     def validate_credentials(self, credentials: Dict[str, Any]) -> bool:
         """Validate OpenAI API key by making a test request."""
@@ -118,21 +119,46 @@ class OpenAIProvider(BaseProvider):
                 ),
             }
             
-            # Filter to only models the user has access to
-            models = [info for model_id, info in curated_models.items() if model_id in available_model_ids]
+            # Check if using custom endpoint (non-empty, non-whitespace base_url)
+            base_url = credentials.get("base_url", "").strip()
+            is_custom_endpoint = bool(base_url)
             
-            # If no curated models found, include all GPT models
-            if not models:
+            if is_custom_endpoint:
+                # For custom endpoints, return ALL models without filtering
+                # (they may not follow OpenAI naming conventions)
                 models = [
                     ModelInfo(
                         id=model.id,
                         name=model.id,
-                        description="OpenAI model",
+                        description="Custom endpoint model",
                         context_length=None
                     )
                     for model in models_response.data
-                    if "gpt" in model.id.lower() or "o1" in model.id.lower()
                 ]
+                
+                # Warn if no models found
+                if not models:
+                    print(f"[OpenAI Provider] WARNING: Custom endpoint returned 0 models")
+            else:
+                # For official OpenAI API, use curated list
+                models = [info for model_id, info in curated_models.items() if model_id in available_model_ids]
+                
+                # If no curated models found, include all GPT/o1 models
+                if not models:
+                    models = [
+                        ModelInfo(
+                            id=model.id,
+                            name=model.id,
+                            description="OpenAI model",
+                            context_length=None
+                        )
+                        for model in models_response.data
+                        if "gpt" in model.id.lower() or "o1" in model.id.lower()
+                    ]
+                    
+                    # Warn if still no models found
+                    if not models:
+                        print(f"[OpenAI Provider] WARNING: No GPT or o1 models found in API response")
             
             for model in models:
                 print(f"[OpenAI Provider]   Found: {model.id}")
@@ -201,29 +227,58 @@ class OpenAIProvider(BaseProvider):
                 ),
             }
             
-            # Filter to only include models that actually exist in the account
-            available_model_ids = {model.id for model in models_response.data}
-            available_models = [
-                info for model_id, info in curated_models.items()
-                if model_id in available_model_ids or model_id.startswith("gpt-")
-            ]
+            # Check if using custom endpoint (non-empty, non-whitespace base_url)
+            base_url = credentials.get("base_url", "").strip()
+            is_custom_endpoint = bool(base_url)
             
-            # If we found any of our curated models, return those
-            # Otherwise, return all GPT models from the API
-            if available_models:
-                return available_models
-            else:
-                # Fallback: return all gpt models
-                return [
+            if is_custom_endpoint:
+                # For custom endpoints, return ALL models without filtering
+                # (they may not follow OpenAI naming conventions)
+                result = [
                     ModelInfo(
                         id=model.id,
                         name=model.id,
-                        description=None,
+                        description="Custom endpoint model",
                         context_length=None
                     )
                     for model in models_response.data
-                    if "gpt" in model.id.lower()
                 ]
+                
+                # Warn if no models found from custom endpoint
+                if not result:
+                    print(f"[OpenAI Provider] WARNING: Custom endpoint at {base_url} returned 0 models")
+                
+                return result
+            else:
+                # For official OpenAI API, use curated list with filtering
+                available_model_ids = {model.id for model in models_response.data}
+                available_models = [
+                    info for model_id, info in curated_models.items()
+                    if model_id in available_model_ids
+                ]
+                
+                # If we found any of our curated models, return those
+                # Otherwise, return all GPT models from the API
+                if available_models:
+                    return available_models
+                else:
+                    # Fallback: return all gpt models
+                    fallback = [
+                        ModelInfo(
+                            id=model.id,
+                            name=model.id,
+                            description=None,
+                            context_length=None
+                        )
+                        for model in models_response.data
+                        if "gpt" in model.id.lower()
+                    ]
+                    
+                    # Warn if still no models found
+                    if not fallback:
+                        print(f"[OpenAI Provider] WARNING: No GPT models found in official OpenAI API response")
+                    
+                    return fallback
                 
         except Exception as e:
             raise ProviderError(f"Failed to list OpenAI models: {str(e)}")

@@ -1,84 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSessions } from "../../contexts/SessionsContext";
 import { useChatContext } from "../../contexts/ChatContext";
-import { apiFetch } from "../../api/client";
 
 const IconPanel = ({ children }: { children: React.ReactNode }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     {children}
   </svg>
 );
-
-const OllamaStatus: React.FC = () => {
-  const [status, setStatus] = useState<"checking" | "running" | "offline" | "error">("checking");
-  const [models, setModels] = useState<string[]>([]);
-
-  const check = async () => {
-    try {
-      const resp = await apiFetch("/api/ollama_status");
-      const data = await resp.json();
-      setStatus(data.status);
-      setModels(data.models || []);
-      return data.status;
-    } catch (e) {
-      setStatus("error");
-      return "error";
-    }
-  };
-
-  useEffect(() => {
-    check();
-  }, []);
-
-  const statusColors = {
-    checking: "#999",
-    running: "#4caf50",
-    offline: "#f44336",
-    error: "#ff9800",
-  };
-
-  const statusLabels = {
-    checking: "Checking...",
-    running: "Ollama",
-    offline: "Ollama Offline",
-    error: "Ollama Error",
-  };
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        fontSize: "12px",
-        color: "var(--text-muted)",
-      }}
-    >
-      <div
-        style={{
-          width: "8px",
-          height: "8px",
-          borderRadius: "50%",
-          background: statusColors[status],
-          boxShadow: status === "running" ? `0 0 8px ${statusColors[status]}` : "none",
-        }}
-      />
-      <span>{statusLabels[status]}</span>
-      <button
-        className="btn"
-        onClick={check}
-        disabled={status === "checking"}
-        style={{ padding: "2px 6px", fontSize: "11px", marginLeft: "2px" }}
-        title={status === "running" && models.length > 0 ? `Models: ${models.join(", ")}\n\nClick to refresh` : "Refresh Ollama status"}
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-    </div>
-  );
-};
 
 const TopNav: React.FC = () => {
   const navigate = useNavigate();
@@ -249,8 +178,6 @@ const TopNav: React.FC = () => {
       </div>
 
       <div className="top-nav__right">
-        <OllamaStatus />
-        <div style={{ width: 8 }} />
         <button className="btn" onClick={() => navigate('/settings')} title="Settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

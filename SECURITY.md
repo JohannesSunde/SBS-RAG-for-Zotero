@@ -1,5 +1,30 @@
 # Security and Privacy Guide
 
+## Data Storage Overview
+
+RAG Assistant stores data in different locations depending on how you're running it:
+
+### Desktop App (Packaged Installer)
+
+When using the desktop application, data is stored in two locations:
+
+1. **Application Data** (Electron-managed, platform-specific):
+   - **macOS**: `~/Library/Application Support/RAG Assistant/`
+   - **Windows**: `%APPDATA%\RAG Assistant\`
+   - **Linux**: `~/.config/rag-assistant/` (venv only)
+   - Stores: Window state, app preferences, temporary files
+
+2. **Profile Data** (Backend-managed, same on all platforms):
+   - **All Platforms**: `~/.zotero-llm/`
+   - Stores: API keys, settings, chat history, vector databases
+   - This location is consistent across all platforms for the backend
+
+### Running from Source (Development)
+
+When running from source code, only `~/.zotero-llm/` is used for all user data.
+
+---
+
 ## What Gets Excluded from Git
 
 The following sensitive files and directories are excluded from version control (see `.gitignore`):
@@ -129,8 +154,13 @@ This script:
 
 1. **Backup your data**:
    ```bash
-   # Backup profile data
+   # Desktop app users: Backup profile data (chat history, settings, vector DB)
    tar -czf zotero-llm-backup.tar.gz ~/.zotero-llm/
+   
+   # Optional: Backup app preferences (if needed)
+   # macOS: ~/Library/Application Support/RAG Assistant/
+   # Windows: %APPDATA%\RAG Assistant\
+   # Linux: ~/.config/rag-assistant/
    ```
 
 2. **Restore from backup**:
@@ -139,10 +169,11 @@ This script:
    ```
 
 3. **Switch machines**:
-   - Don't copy `.zotero-llm` directory
-   - Use `setup.sh` on new machine
+   - Desktop app: Just install the app on new machine, reconfigure settings
+   - Don't need to copy `.zotero-llm` directory (profiles will be recreated)
    - Reconfigure API keys via Settings UI
    - Re-index library (database will be rebuilt)
+   - Source users: Use `setup.sh` on new machine
 
 4. **Secure your API keys**:
    - Never share screenshots of Settings page
@@ -219,12 +250,14 @@ cd frontend && npm install
 
 ### Fresh Start
 ```bash
-# Remove all user data
+# Desktop app users: Remove profile data
 rm -rf ~/.zotero-llm/
+# App will recreate profiles on next launch
+# Reconfigure settings via UI
 
-# Reinitialize
+# Source/development users: Full reset
+rm -rf ~/.zotero-llm/
 ./setup.sh
-
 # Reconfigure settings via UI
 ```
 

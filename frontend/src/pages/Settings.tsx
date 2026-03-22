@@ -90,6 +90,8 @@ const Settings: React.FC = () => {
         }
       }
     }));
+    // Clear cached models so they reload with the new credentials/endpoint
+    setAvailableModels(prev => { const updated = { ...prev }; delete updated[providerId]; return updated; });
     setSaveSuccess(false);
     setSaveError(null);
   };
@@ -740,6 +742,19 @@ const Settings: React.FC = () => {
             />
             <p className="settings-hint">
               Full path to your <code>zotero.sqlite</code> file. This is typically in your Zotero data directory.
+            </p>
+          </div>
+          <div className="settings-field">
+            <label className="settings-label">PDF Storage Directory <span style={{ fontWeight: 'normal', opacity: 0.7 }}>(optional)</span></label>
+            <input
+              type="text"
+              className="settings-input"
+              value={formData.pdfStoragePath ?? ''}
+              onChange={(e) => handleInputChange('pdfStoragePath', e.target.value)}
+              placeholder={navigator.platform.startsWith('Win') ? 'C:\\Users\\YourName\\Zotero\\storage' : (navigator.platform.startsWith('Mac') ? '/Users/YourName/Zotero/storage' : '~/Zotero/storage')}
+            />
+            <p className="settings-hint">
+              Path to your Zotero PDF storage folder. Leave blank to use the default location next to the database file.
             </p>
           </div>
         </section>
