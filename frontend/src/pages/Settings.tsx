@@ -273,7 +273,7 @@ const Settings: React.FC = () => {
             {provider.requires_api_key && (
               <div className="settings-field">
                 <label className="settings-label" htmlFor={`${provider.id}-api-key`}>
-                  API Key
+                  {provider.id === 'github_models' ? 'GitHub Token' : 'API Key'}
                   {provider.id === 'google' && (
                     <span style={{ marginLeft: '8px', fontSize: '12px', color: '#ff5722', fontWeight: 'normal' }}>
                       (Unreliable)
@@ -297,7 +297,7 @@ const Settings: React.FC = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       handleProviderCredentialChange(provider.id, 'api_key', e.target.value)
                     }
-                    placeholder="Enter API key"
+                    placeholder={provider.id === 'github_models' ? 'Enter GitHub personal access token' : 'Enter API key'}
                     className="settings-input"
                     style={{ paddingRight: '40px' }}
                   />
@@ -319,9 +319,11 @@ const Settings: React.FC = () => {
                     )}
                   </button>
                 </div>
-                {['openai', 'mistral', 'groq', 'openrouter'].includes(provider.id) && (
+                {['openai', 'mistral', 'groq', 'openrouter', 'github_models'].includes(provider.id) && (
                   <p className="settings-helper-text">
-                    Models are automatically discovered from your API key when you test the connection.
+                    {provider.id === 'github_models'
+                      ? 'Generate a token at github.com/settings/tokens (no special scopes required). Works with GitHub Copilot subscriptions.'
+                      : 'Models are automatically discovered from your API key when you test the connection.'}
                   </p>
                 )}
               </div>

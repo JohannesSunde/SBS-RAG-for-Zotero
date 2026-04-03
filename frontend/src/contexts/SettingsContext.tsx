@@ -87,6 +87,10 @@ const defaultSettings: Settings = {
     openrouter: {
       enabled: false,
       credentials: { api_key: '' }
+    },
+    github_models: {
+      enabled: false,
+      credentials: { api_key: '' }
     }
   }
 };
