@@ -44,7 +44,7 @@ Install [Zotero](https://www.zotero.org/download/) and sync your library:
 
 Choose either Ollama or LM Studio to run models locally on your machine:
 
-**Ollama** (recommended):
+**Ollama**:
 ```bash
 # macOS/Linux - Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
