@@ -194,6 +194,12 @@ def load_settings(profile_id: str = None):
                 "credentials": {
                     "api_key": ""
                 }
+            },
+            "github_models": {
+                "enabled": False,
+                "credentials": {
+                    "api_key": ""
+                }
             }
         }
     }
@@ -1114,7 +1120,7 @@ def validate_provider(provider_id: str, credentials: dict = Body(...)):
             print(f"[Validation] No API key found in settings")
         
         # For providers with dynamic discovery, use enhanced validation
-        providers_with_discovery = ["google", "openai", "mistral", "groq", "openrouter", "anthropic"]
+        providers_with_discovery = ["google", "openai", "mistral", "groq", "openrouter", "anthropic", "github_models"]
         
         if provider_id in providers_with_discovery and hasattr(provider, 'validate_credentials_and_list_models'):
             result = provider.validate_credentials_and_list_models(creds)

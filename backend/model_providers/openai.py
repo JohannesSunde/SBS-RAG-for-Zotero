@@ -5,6 +5,9 @@ Implements the ModelProvider interface for OpenAI's API, supporting
 GPT-4, GPT-3.5, and other OpenAI models.
 """
 
+import re
+import httpx
+from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
 from .base import (
     BaseProvider, Message, ChatResponse, ModelInfo,
@@ -12,6 +15,12 @@ from .base import (
     ProviderRateLimitError, ProviderContextError,
     MessageAdapter, ParameterMapper
 )
+
+
+@dataclass
+class _ModelStub:
+    """Lightweight proxy for model entries returned by raw HTTP model list responses."""
+    id: str
 
 
 class OpenAIProvider(BaseProvider):
@@ -62,9 +71,42 @@ class OpenAIProvider(BaseProvider):
             else:
                 raise ProviderError(f"OpenAI validation failed: {str(e)}")
     
+    def _extract_model_id(self, raw_id: str) -> str:
+        """Extract a usable model name from Azure ML resource paths.
+
+        azureml://registries/azure-openai/models/gpt-4o/versions/2 -> gpt-4o
+        """
+        match = re.search(r'/models/([^/]+)/versions/', raw_id)
+        if match:
+            return match.group(1)
+        return raw_id
+
+    def _list_models_raw(self, credentials: Dict[str, Any]):
+        """Fetch models via raw HTTP for endpoints that don't follow OpenAI response format."""
+        base_url = credentials.get("base_url", "").rstrip("/")
+        api_key = credentials.get("api_key", "")
+        resp = httpx.get(
+            f"{base_url}/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        # Handle both {"data": [...]} and plain [...] responses
+        items = data if isinstance(data, list) else data.get("data", [])
+        # Normalize model IDs — replace Azure ML paths with simple names
+        normalized = []
+        for m in items:
+            if isinstance(m, dict):
+                raw_id = m.get("id", "")
+                m = dict(m)
+                m["id"] = self._extract_model_id(raw_id)
+            normalized.append(m)
+        return normalized
+
     def validate_credentials_and_list_models(self, credentials: Dict[str, Any]) -> Dict[str, Any]:
         """Validate credentials AND return available models dynamically.
-        
+
         Returns:
             {
                 "valid": bool,
@@ -75,9 +117,17 @@ class OpenAIProvider(BaseProvider):
         try:
             client = self._get_client(credentials)
             print(f"[OpenAI Provider] Fetching dynamic models via client.models.list()...")
-            
-            models_response = client.models.list()
-            available_model_ids = {model.id for model in models_response.data}
+
+            try:
+                models_response = client.models.list()
+                raw_models = list(models_response.data)
+            except (AttributeError, TypeError):
+                # Custom endpoint returned a plain list — fall back to raw HTTP
+                print(f"[OpenAI Provider] SDK parse failed, falling back to raw HTTP model fetch")
+                raw_items = self._list_models_raw(credentials)
+                raw_models = [_ModelStub(id=m.get("id", m) if isinstance(m, dict) else m) for m in raw_items]
+
+            available_model_ids = {model.id for model in raw_models}
             
             # Define curated models for academic use
             curated_models = {
@@ -133,16 +183,16 @@ class OpenAIProvider(BaseProvider):
                         description="Custom endpoint model",
                         context_length=None
                     )
-                    for model in models_response.data
+                    for model in raw_models
                 ]
-                
+
                 # Warn if no models found
                 if not models:
                     print(f"[OpenAI Provider] WARNING: Custom endpoint returned 0 models")
             else:
                 # For official OpenAI API, use curated list
                 models = [info for model_id, info in curated_models.items() if model_id in available_model_ids]
-                
+
                 # If no curated models found, include all GPT/o1 models
                 if not models:
                     models = [
@@ -152,7 +202,7 @@ class OpenAIProvider(BaseProvider):
                             description="OpenAI model",
                             context_length=None
                         )
-                        for model in models_response.data
+                        for model in raw_models
                         if "gpt" in model.id.lower() or "o1" in model.id.lower()
                     ]
                     
@@ -197,8 +247,14 @@ class OpenAIProvider(BaseProvider):
         try:
             client = self._get_client(credentials)
             # Get models from API
-            models_response = client.models.list()
-            
+            try:
+                models_response = client.models.list()
+                raw_models = list(models_response.data)
+            except (AttributeError, TypeError):
+                print(f"[OpenAI Provider] SDK parse failed, falling back to raw HTTP model fetch")
+                raw_items = self._list_models_raw(credentials)
+                raw_models = [_ModelStub(id=m.get("id", m) if isinstance(m, dict) else m) for m in raw_items]
+
             # Define curated models we care about for academic use
             curated_models = {
                 "gpt-4o": ModelInfo(
@@ -241,17 +297,17 @@ class OpenAIProvider(BaseProvider):
                         description="Custom endpoint model",
                         context_length=None
                     )
-                    for model in models_response.data
+                    for model in raw_models
                 ]
-                
+
                 # Warn if no models found from custom endpoint
                 if not result:
                     print(f"[OpenAI Provider] WARNING: Custom endpoint at {base_url} returned 0 models")
-                
+
                 return result
             else:
                 # For official OpenAI API, use curated list with filtering
-                available_model_ids = {model.id for model in models_response.data}
+                available_model_ids = {model.id for model in raw_models}
                 available_models = [
                     info for model_id, info in curated_models.items()
                     if model_id in available_model_ids
@@ -270,7 +326,7 @@ class OpenAIProvider(BaseProvider):
                             description=None,
                             context_length=None
                         )
-                        for model in models_response.data
+                        for model in raw_models
                         if "gpt" in model.id.lower()
                     ]
                     

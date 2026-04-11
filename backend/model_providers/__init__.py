@@ -11,6 +11,7 @@ from .ollama import OllamaProvider
 from .lmstudio import LMStudioProvider
 from .openai import OpenAIProvider
 from .anthropic import AnthropicProvider
+from .github_models import GitHubModelsProvider
 from .additional import (
     MistralProvider,
     GoogleProvider,
@@ -60,6 +61,7 @@ def _initialize_providers():
         LMStudioProvider(),
         OpenAIProvider(),
         AnthropicProvider(),
+        GitHubModelsProvider(),
         MistralProvider(),
         GoogleProvider(),
         GroqProvider(),
