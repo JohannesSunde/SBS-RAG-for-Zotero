@@ -8,7 +8,7 @@ access token. Works with GitHub Copilot subscriptions and free accounts
 """
 
 from typing import Dict, Any, List
-from .base import Message, ChatResponse, ModelInfo
+from .base import BaseProvider, Message, ChatResponse, ModelInfo
 from .openai import OpenAIProvider
 
 
@@ -19,10 +19,16 @@ class GitHubModelsProvider(OpenAIProvider):
     """Provider implementation for GitHub Models (OpenAI-compatible API)."""
 
     def __init__(self):
-        super().__init__()
-        self._id = "github_models"
-        self._label = "GitHub Models"
-        self._default_model = "gpt-4o-mini"
+        # Call BaseProvider.__init__ directly to set provider identity without
+        # inheriting OpenAI's hardcoded id/label while still reusing all its logic.
+        BaseProvider.__init__(
+            self,
+            id="github_models",
+            label="GitHub Models",
+            default_model="gpt-4o-mini",
+            supports_streaming=True,
+            requires_api_key=True,
+        )
 
     def _with_base_url(self, credentials: Dict[str, Any]) -> Dict[str, Any]:
         """Return credentials with the hardcoded GitHub Models base URL."""

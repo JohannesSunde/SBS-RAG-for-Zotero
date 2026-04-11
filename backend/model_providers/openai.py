@@ -5,6 +5,9 @@ Implements the ModelProvider interface for OpenAI's API, supporting
 GPT-4, GPT-3.5, and other OpenAI models.
 """
 
+import re
+import httpx
+from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
 from .base import (
     BaseProvider, Message, ChatResponse, ModelInfo,
@@ -12,6 +15,12 @@ from .base import (
     ProviderRateLimitError, ProviderContextError,
     MessageAdapter, ParameterMapper
 )
+
+
+@dataclass
+class _ModelStub:
+    """Lightweight proxy for model entries returned by raw HTTP model list responses."""
+    id: str
 
 
 class OpenAIProvider(BaseProvider):
@@ -67,7 +76,6 @@ class OpenAIProvider(BaseProvider):
 
         azureml://registries/azure-openai/models/gpt-4o/versions/2 -> gpt-4o
         """
-        import re
         match = re.search(r'/models/([^/]+)/versions/', raw_id)
         if match:
             return match.group(1)
@@ -75,7 +83,6 @@ class OpenAIProvider(BaseProvider):
 
     def _list_models_raw(self, credentials: Dict[str, Any]):
         """Fetch models via raw HTTP for endpoints that don't follow OpenAI response format."""
-        import httpx
         base_url = credentials.get("base_url", "").rstrip("/")
         api_key = credentials.get("api_key", "")
         resp = httpx.get(
@@ -118,7 +125,7 @@ class OpenAIProvider(BaseProvider):
                 # Custom endpoint returned a plain list — fall back to raw HTTP
                 print(f"[OpenAI Provider] SDK parse failed, falling back to raw HTTP model fetch")
                 raw_items = self._list_models_raw(credentials)
-                raw_models = [type("M", (), {"id": m.get("id", m) if isinstance(m, dict) else m})() for m in raw_items]
+                raw_models = [_ModelStub(id=m.get("id", m) if isinstance(m, dict) else m) for m in raw_items]
 
             available_model_ids = {model.id for model in raw_models}
             
@@ -246,7 +253,7 @@ class OpenAIProvider(BaseProvider):
             except (AttributeError, TypeError):
                 print(f"[OpenAI Provider] SDK parse failed, falling back to raw HTTP model fetch")
                 raw_items = self._list_models_raw(credentials)
-                raw_models = [type("M", (), {"id": m.get("id", m) if isinstance(m, dict) else m})() for m in raw_items]
+                raw_models = [_ModelStub(id=m.get("id", m) if isinstance(m, dict) else m) for m in raw_items]
 
             # Define curated models we care about for academic use
             curated_models = {
