@@ -151,15 +151,24 @@ class ZoteroLibrary:
         for item in results:
             pdf_full_path = None
             if item[7] and item[8]:
-                # Clean the attachment_path to get only the actual filename
-                base_filename = item[8]
-                # Remove prefixes like 'storage:' if present
-                if base_filename and ':' in base_filename:
-                    base_filename = base_filename.split(':')[-1]
-                # Remove any leading directories or slashes
-                base_filename = os.path.basename(base_filename)
-                # Now build the correct full path
-                pdf_full_path = os.path.join(storage_dir, item[7], base_filename) if base_filename else None
+                raw_path = item[8]
+
+                if raw_path.startswith('storage:'):
+                    # Stored file: path is relative filename inside storage_dir/attach_key/
+                    base_filename = os.path.basename(raw_path[len('storage:'):])
+                    pdf_full_path = os.path.join(storage_dir, item[7], base_filename) if base_filename else None
+                elif os.path.isabs(raw_path):
+                    # Linked file with absolute path (e.g. ZotMoov): use as-is
+                    pdf_full_path = raw_path
+                elif raw_path.startswith('attachments:'):
+                    # Linked file with path relative to Zotero's linked-file base directory.
+                    # When a custom storage_path is configured we treat it as that base dir.
+                    relative_path = raw_path[len('attachments:'):]
+                    pdf_full_path = os.path.join(storage_dir, relative_path)
+                else:
+                    # Unknown format: best-effort using basename under storage_dir/attach_key
+                    base_filename = os.path.basename(raw_path)
+                    pdf_full_path = os.path.join(storage_dir, item[7], base_filename) if base_filename else None
 
             metadata = {
                 'item_id': str(item[0]),
