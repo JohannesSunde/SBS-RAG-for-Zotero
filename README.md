@@ -1,7 +1,7 @@
 
 # RAG Assistant for Zotero
 
-A desktop application that lets you chat with your Zotero library using large language models. Ask questions about your research and get answers grounded in your own documents, with citations and page numbers.
+An open‑source desktop RAG application that enables semantic search across your Zotero library. Easily discover conceptually related papers and ideas within your PDF collection using local or cloud‑based LLMs. The app provides source attribution, metadata filtering, and seamless integration with Zotero. macOS and Linux are fully supported. Windows support is limited.
 
 ## What It Does
 
