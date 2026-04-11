@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSessions } from "../../contexts/SessionsContext";
 import { useResponseSelection } from "../../contexts/ResponseSelectionContext";
+import { apiFetch } from "../../api/client";
 import type { Source } from "../../types/session";
 
 /**

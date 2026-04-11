@@ -70,6 +70,14 @@ Configure API keys in Settings for: **OpenAI**, **Anthropic**, **Google**, **Mis
 Download the latest installer from [Releases](https://github.com/aahepburn/RAG-Assistant-for-Zotero/releases):
 
 #### macOS
+
+**Via Homebrew (recommended):**
+```bash
+brew install aahepburn/rag-assistant-for-zotero/rag-assistant-for-zotero
+```
+> Note: Since the app isn't notarized, macOS will block it on first launch. Run this command after installing: `xattr -dr com.apple.quarantine "/Applications/RAG Assistant.app"`
+
+**Manual install:**
 1. Download `RAG-Assistant-{version}-mac-arm64.dmg` (Apple Silicon) or `-mac-x64.dmg` (Intel)
 2. Open the DMG file
 3. Drag the app icon to the Applications folder
@@ -82,6 +90,13 @@ Download the latest installer from [Releases](https://github.com/aahepburn/RAG-A
 - **Apple Silicon (M1/M2/M3) recommended** - Intel Mac builds may have limited support due to PyTorch compatibility
 
 #### Windows
+
+**Via winget (recommended):**
+```powershell
+winget install aahepburn.RAGAssistantForZotero
+```
+
+**Manual install:**
 1. Download `RAG-Assistant-{version}-win-x64.exe`
 2. Run the installer (may show SmartScreen warning on first run - click "More info" then "Run anyway")
 3. Choose installation location (default: `C:\Users\{username}\AppData\Local\Programs\`)
