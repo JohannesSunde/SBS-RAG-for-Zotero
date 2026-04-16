@@ -7,7 +7,7 @@ An open‑source desktop RAG application that enables semantic search across you
 
 This tool indexes the PDFs in your Zotero library and uses retrieval-augmented generation (RAG) to answer questions based on their content. Every answer includes citations to the specific sources and page numbers used, making it easy to verify claims and follow up on interesting findings.
 
-The application can run entirely on your local machine. Your documents and queries stay private.
+The application can run entirely on your local machine. Your documents and queries stay private if you use local models.
 
 ## Key Features
 
