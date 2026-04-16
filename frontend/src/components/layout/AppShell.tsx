@@ -8,11 +8,13 @@ import LibraryManagementPanel from "../../features/library/LibraryManagementPane
 import SidebarTabs, { TabConfig } from "./SidebarTabs";
 import TopNav from "./TopNav";
 import "../../styles/layout.css";
-import "../../styles/sidebar-tabs.css";
-import { useSessions } from "../../contexts/SessionsContext";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import PdfViewer from "../../features/pdf/PdfViewer";
+import { usePdf } from "../../contexts/PdfContext";
 
 const AppShell: React.FC = () => {
   const { leftCollapsed, rightCollapsed, leftActiveTab, setLeftActiveTab } = useSessions();
+  const { isOpen: isPdfOpen } = usePdf();
   const classes = ["app-shell", leftCollapsed ? "app-shell--left-collapsed" : "", rightCollapsed ? "app-shell--right-collapsed" : ""].join(" ");
 
   // Define left sidebar tabs
@@ -77,9 +79,24 @@ const AppShell: React.FC = () => {
             onTabChange={setLeftActiveTab}
           />
         </aside>
+        
         <main className="app-shell__main">
-          <ChatView />
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={isPdfOpen ? 50 : 100} minSize={30}>
+              <ChatView />
+            </Panel>
+            
+            {isPdfOpen && (
+              <>
+                <PanelResizeHandle className="app-shell__resizer" />
+                <Panel defaultSize={50} minSize={30}>
+                  <PdfViewer />
+                </Panel>
+              </>
+            )}
+          </PanelGroup>
         </main>
+
         <section className="app-shell__sources">
           <SourcesPanel />
         </section>

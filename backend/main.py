@@ -115,6 +115,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import FileResponse
+from fastapi import HTTPException
+
+@app.get("/api/pdf/{zotero_id}")
+async def serve_pdf(zotero_id: str):
+    """Serve a local PDF file from the Zotero library based on its ID."""
+    try:
+        # Find the item in Zotero library to get its file path
+        zlib = ZoteroLibrary(DB_PATH)
+        # We search specifically for the item to get its attachment path
+        item_data = zlib.get_item_data(zotero_id)
+        if not item_data or not item_data.get('pdf_path'):
+            raise HTTPException(status_code=404, detail="PDF attachment not found for this item")
+        
+        pdf_path = item_data['pdf_path']
+        if not os.path.exists(pdf_path):
+            raise HTTPException(status_code=404, detail=f"PDF file not found at {pdf_path}")
+            
+        return FileResponse(pdf_path, media_type="application/pdf")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Default paths - use user's home directory for cross-platform compatibility
 _home = Path.home()
 DB_PATH = str(_home / "Zotero" / "zotero.sqlite")

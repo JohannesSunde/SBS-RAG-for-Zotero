@@ -306,7 +306,9 @@ class ZoteroChatbot:
                         "item_type": item_type,
                         "year": year,  # Integer (0 if unknown)
                         "pdf_path": pdf_path,
-                        "page": chunk_info.get('page', 0),  # Use 0 if page is None
+                        "page": chunk_info.get('page', 0),  # Internal page number
+                        "page_label": chunk_info.get('page_label', str(chunk_info.get('page', 0))),
+                        "zotero_id": item_id,
                     })
 
                 try:
@@ -509,7 +511,9 @@ class ZoteroChatbot:
                         "item_type": item_type,
                         "year": year,  # Integer (0 if unknown)
                         "pdf_path": pdf_path,
-                        "page": chunk_info.get('page', 0),  # Use 0 if page is None
+                        "page": chunk_info.get('page', 0),  # Internal page number
+                        "page_label": chunk_info.get('page_label', str(chunk_info.get('page', 0))),
+                        "zotero_id": item_id,
                     })
 
                 try:
@@ -690,7 +694,8 @@ class ZoteroChatbot:
                     if current_chunk.strip():
                         chunks_with_pages.append({
                             'text': current_chunk.strip(),
-                            'page': page_num
+                            'page': page_num,
+                            'page_label': page_data.get('page_label', str(page_num))
                         })
                     
                     # Start new chunk with overlap
@@ -705,7 +710,8 @@ class ZoteroChatbot:
             if current_chunk.strip():
                 chunks_with_pages.append({
                     'text': current_chunk.strip(),
-                    'page': page_num
+                    'page': page_num,
+                    'page_label': page_data.get('page_label', str(page_num))
                 })
         
         return chunks_with_pages

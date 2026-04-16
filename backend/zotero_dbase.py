@@ -250,9 +250,22 @@ class ZoteroLibrary:
             return [
                 {"name": row[0], "count": row[1]}
                 for row in cur.fetchall()
-                if row[0]
             ]
     
+    def get_item_data(self, item_id: str):
+        """Get data for a single item inclusive of PDF path."""
+        # This is a bit inefficient because it re-runs the search logic for one item,
+        # but it reuses the complex query structure.
+        # We could optimize by passing itemID filter to search_parent_items_with_pdfs.
+        
+        # Actually, let's just use the existing method and filter the results.
+        # It's safer and easier to maintain.
+        all_items = self.search_parent_items_with_pdfs()
+        for item in all_items:
+            if str(item.metadata.get('item_id')) == str(item_id):
+                return item.metadata
+        return None
+
     def close(self):
         """Close thread-local connections. Call this on shutdown."""
         if hasattr(self._local, 'conn') and self._local.conn is not None:

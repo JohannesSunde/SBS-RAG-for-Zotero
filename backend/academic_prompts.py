@@ -44,7 +44,7 @@ class AcademicPrompts:
 ## Key guidelines
 
 - Synthesize findings from multiple sources into coherent explanations
-- Cite sources using provided citation IDs [1], [2], etc.
+- Cite sources using the format `[[ID:X, Page:Y]]` where X is the numeric ID and Y is the page label
 - Identify research gaps and contradictions when present
 - Answer follow-up questions directly without meta-responses
 - Use only the provided context - do not search external sources
@@ -52,22 +52,23 @@ class AcademicPrompts:
 
 ## Citation format
 
-- Add inline citations [N] for factual claims
-- Use multiple citations [1][2] when multiple sources support a point
-- Provide Chicago-style references when listing sources"""
+- Add inline citations `[[ID:X, Page:Y]]` for factual claims
+- Use multiple citations `[[ID:1, Page:5]][[ID:2, Page:10]]` when multiple sources support a point
+- Provide Chicago-style references when listing sources at the end
+- IMPORTANT: The format `[[ID:X, Page:Y]]` is critical for deep-linking to the PDF sources."""
 
     # 2. RAG INSTRUCTIONS - Citation and grounding requirements
     RAG_INSTRUCTIONS = """
 ## Citation rules
 
-- For every factual claim, add an inline numeric citation in the form `[N]`, where `N` matches the citation IDs provided in the context.
-- Use multiple citations `[1][2]` when several sources support the same point.
+- For every factual claim, add an inline citation in the form `[[ID:X, Page:Y]]`, where `X` matches the source code provided in the context and `Y` is the page label.
+- Use multiple citations `[[ID:1, Page:5]][[ID:2, Page:12]]` when several sources support the same point.
 - Do not assert factual claims without support from the provided context or the conversation history.
 
 ### Chicago-style references
 
 - When you give full references (for example in a "References" section or in explanatory prose), format them according to the Chicago Manual of Style (notes and bibliography), using whatever metadata is available (author, year, title, journal or publisher, volume/issue, pages).
-- Use the numeric keys `[1]`, `[2]`, etc. consistently to link bodies of text to these references.
+- Use the numeric keys `[1]`, `[2]`, etc. consistently to link bodies of text to these references (or simply refer to them by the bibliographic info).
 - Example (structure only; adapt to given metadata):
 
   - `[1]` Doe, Jane. *Title of the Article.* Journal Name 12, no. 3 (2020): 123–145.
@@ -262,11 +263,11 @@ Before finalizing your answer, ensure that:
 
 Answer the question using **only** the context above and this conversation. Follow these rules:
 
-1. Add an inline numeric citation `[N]` after every factual claim, where `N` matches the citation IDs in the context.
+1. Add an inline citation `[[ID:X, Page:Y]]` after every factual claim, where `X` is the numeric source ID and `Y` is the page label.
 2. Begin with a 2–3 sentence direct answer that addresses the core question.
 3. Provide 3–5 bullet points of key evidence, each with at least one citation.
 4. Synthesize across sources where possible, and mention agreements, differences, and limitations.
-5. When you give full references (e.g., in a short "References" section), format them in Chicago style (notes and bibliography) using the available metadata, and label them with `[N]` to match the inline citations.
+5. When you give full references (e.g., in a short "References" section), format them in Chicago style (notes and bibliography) using the available metadata, and label them with `[N]` to match the numeric IDs.
 6. If the context does not contain enough information to answer confidently, say so explicitly instead of speculating.{reasoning_instruction}
 
 ---
