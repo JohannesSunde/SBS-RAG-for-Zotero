@@ -179,248 +179,32 @@ class ZoteroChatbot:
 
         return scaled
 
-    def _index_library_worker(self):
+    def _index_items_worker(self, items_data: list, mode_label: str = "indexing"):
+        """Unified indexing worker that processes a list of Zotero items.
+        
+        This is the single source of truth for all indexing logic.
+        Both full and incremental indexing delegate to this method.
+        
+        Args:
+            items_data: List of raw item dicts from ZoteroLibrary
+            mode_label: Label for logging ("full" or "incremental")
+        """
+        from backend.embed_utils import get_embeddings_batch, get_embedding_dimension
+        
         try:
             start_time = time.time()
             self.index_progress["start_time"] = start_time
-            
-            # Validate database access before starting
-            try:
-                raw_items = self.zlib.search_parent_items_with_pdfs()
-            except Exception as e:
-                error_str = str(e)
-                if "database is locked" in error_str.lower():
-                    error_msg = "Database is locked — please close Zotero completely before syncing."
-                else:
-                    error_msg = f"Failed to access Zotero database: {error_str}"
-                print(f"FATAL ERROR: {error_msg}")
-                self.index_progress["error"] = error_msg
-                return
-            
-            self.index_progress["total_items"] = len(raw_items)
+            self.index_progress["total_items"] = len(items_data)
             self.index_progress["processed_items"] = 0
             
-            if len(raw_items) == 0:
-                self.index_progress["error"] = "No items with PDFs found in Zotero library"
-                print("WARNING: No items with PDFs found")
+            if len(items_data) == 0:
+                self.index_progress["error"] = "No items to index"
+                print(f"WARNING: No items to index ({mode_label} mode)")
                 return
             
-            items = [ZoteroItem(filepath=it['pdf_path'], metadata=it) for it in raw_items]
+            items = [ZoteroItem(filepath=it['pdf_path'], metadata=it) for it in items_data]
 
-            # Extract text for each item using PDF logic with page numbers
-            for item in items:
-                if self._cancel_indexing:
-                    break
-                if not (item.filepath and os.path.exists(item.filepath)):
-                    skip_reason = f"Item {item.metadata.get('item_id')}: PDF not found at {item.filepath}"
-                    print(f"SKIPPED: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                    self.index_progress["processed_items"] += 1
-                    continue
-                pdf = PDF(item.filepath)
-                # Use page-aware extraction
-                try:
-                    pages_data = pdf.extract_text_with_pages()
-                    item.metadata['pages_data'] = pages_data
-                    text = "\\n\\n".join([p['text'] for p in pages_data])
-                    item.metadata['text'] = text if text else ""
-                    if not text:
-                        print(f"WARNING: Item {item.metadata.get('item_id')} PDF extracted but no text found")
-                except Exception as e:
-                    skip_reason = f"Item {item.metadata.get('item_id')}: PDF extraction failed - {str(e)}"
-                    print(f"ERROR: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                    self.index_progress["processed_items"] += 1
-                    item.metadata['pages_data'] = []
-
-            # Vectorize each item's text (chunk/embedding logic with page tracking)
-            for item in items:
-                if self._cancel_indexing:
-                    break
-                pages_data = item.metadata.get('pages_data') or []
-                if not pages_data:
-                    # Item was already marked as failed in PDF extraction phase
-                    # Skip silently without incrementing progress again
-                    continue
-                
-                # Chunk with page awareness
-                chunks_with_pages = self.chunk_text_with_pages(pages_data)
-                if not chunks_with_pages:
-                    skip_reason = f"Item {item.metadata.get('item_id')}: No chunks created from pages data"
-                    print(f"SKIPPED: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                    self.index_progress["processed_items"] += 1
-                    continue
-                
-                chunks = [c['text'] for c in chunks_with_pages]
-                try:
-                    vectors = [get_embedding(chunk, self.embedding_model_id) for chunk in chunks]
-                except Exception as e:
-                    skip_reason = f"Item {item.metadata.get('item_id')}: Embedding generation failed - {str(e)}"
-                    print(f"ERROR: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                    self.index_progress["processed_items"] += 1
-                    continue
-                
-                # Validate embedding dimensions
-                from backend.embed_utils import get_embedding_dimension
-                expected_dim = get_embedding_dimension(self.embedding_model_id)
-                if vectors and len(vectors[0]) != expected_dim:
-                    skip_reason = f"Item {item.metadata.get('item_id')}: Unexpected embedding dimension {len(vectors[0])}, expected {expected_dim}"
-                    print(f"ERROR: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                    self.index_progress["processed_items"] += 1
-                    continue
-
-                # Generate unique chunk IDs
-                item_id = str(item.metadata.get('item_id'))
-                chunk_ids = [f"{item_id}:{i}" for i in range(len(chunks))]
-
-                # Sanitize metadata per chunk to primitives, no None
-                meta_src = item.metadata
-                title = meta_src.get("title") or ""
-                authors = meta_src.get("authors") or ""
-                tags = meta_src.get("tags") or ""
-                collections = meta_src.get("collections") or ""
-                item_type = meta_src.get("item_type") or ""
-                
-                # Parse year as integer (supports format like "2020-01-15" or just "2020")
-                year_str = meta_src.get("date") or ""
-                year = 0  # Default to 0 instead of None (ChromaDB doesn't accept None)
-                if year_str:
-                    match = re.search(r'\b(19|20)\d{2}\b', year_str)
-                    if match:
-                        year = int(match.group(0))
-                
-                pdf_path = meta_src.get("pdf_path") or ""
-
-                metas = []
-                for i, chunk_info in enumerate(chunks_with_pages):
-                    metas.append({
-                        "item_id": item_id,
-                        "chunk_idx": int(i),
-                        "title": title,
-                        "authors": authors,
-                        "tags": tags,
-                        "collections": collections,
-                        "item_type": item_type,
-                        "year": year,  # Integer (0 if unknown)
-                        "pdf_path": pdf_path,
-                        "page": chunk_info.get('page', 0),  # Internal page number
-                        "page_label": chunk_info.get('page_label', str(chunk_info.get('page', 0))),
-                        "zotero_id": item_id,
-                    })
-
-                try:
-                    self.chroma.add_chunks(
-                        ids=chunk_ids,
-                        documents=chunks,
-                        metadatas=metas,
-                        embeddings=vectors
-                    )
-                    print(f"SUCCESS: Indexed item {item_id} with {len(chunks)} chunks")
-                except Exception as e:
-                    skip_reason = f"Item {item_id}: Failed to add to ChromaDB - {str(e)}"
-                    print(f"ERROR: {skip_reason}")
-                    self.index_progress["skip_reasons"].append(skip_reason)
-                
-                # Update progress after processing this item
-                self.index_progress["processed_items"] += 1
-                
-                # Calculate time estimates
-                elapsed = time.time() - self.index_progress["start_time"]
-                self.index_progress["elapsed_seconds"] = int(elapsed)
-                
-                processed = self.index_progress["processed_items"]
-                total = self.index_progress["total_items"]
-                if processed > 0 and total > 0:
-                    avg_time_per_item = elapsed / processed
-                    remaining_items = total - processed
-                    self.index_progress["eta_seconds"] = int(avg_time_per_item * remaining_items)
-                
-                # small sleep to allow cancellation to be checked promptly in CPU-bound loops
-                time.sleep(0)
-            
-            # Build BM25 index after adding all chunks
-            successful_items = self.index_progress["processed_items"] - len(self.index_progress.get("skip_reasons", []))
-            if successful_items > 0:
-                print(f"Building BM25 index for sparse retrieval after indexing {successful_items} items...")
-                self.chroma.build_bm25_index()
-            
-            # Print summary
-            print(f"\\n=== Full Indexing Summary ===")
-            print(f"Total items attempted: {self.index_progress['total_items']}")
-            print(f"Successfully indexed: {successful_items}")
-            print(f"Skipped/Failed: {len(self.index_progress.get('skip_reasons', []))}")
-            
-            # Check if ALL items failed
-            if successful_items == 0 and self.index_progress['total_items'] > 0:
-                error_msg = f"All {self.index_progress['total_items']} items failed to index. Common causes: PDFs not found (check storage path), network drive issues, or file permissions."
-                print(f"FATAL ERROR: {error_msg}")
-                self.index_progress["error"] = error_msg
-            
-            if self.index_progress.get('skip_reasons'):
-                print(f"\\nSkip reasons:")
-                for reason in self.index_progress['skip_reasons'][:10]:  # Show first 10
-                    print(f"  - {reason}")
-                if len(self.index_progress['skip_reasons']) > 10:
-                    print(f"  ... and {len(self.index_progress['skip_reasons']) - 10} more")
-            print(f"=============================\\n")
-        except Exception as e:
-            # Catch any unexpected exceptions at thread level
-            import traceback
-            error_msg = f"Indexing crashed: {str(e)}"
-            traceback_str = traceback.format_exc()
-            print(f"FATAL ERROR: {error_msg}")
-            print(f"Traceback:\\n{traceback_str}")
-            self.index_progress["error"] = error_msg
-        finally:
-            self.is_indexing = False
-            self._cancel_indexing = False
-
-    def _index_library_incremental_worker(self):
-        """Index only new items that aren't already in the database."""
-        try:
-            start_time = time.time()
-            self.index_progress["start_time"] = start_time
-            
-            # Validate database access before starting
-            try:
-                raw_items = self.zlib.search_parent_items_with_pdfs()
-            except Exception as e:
-                error_str = str(e)
-                if "database is locked" in error_str.lower():
-                    error_msg = "Database is locked — please close Zotero completely before syncing."
-                else:
-                    error_msg = f"Failed to access Zotero database: {error_str}"
-                print(f"FATAL ERROR: {error_msg}")
-                self.index_progress["error"] = error_msg
-                return
-            
-            all_item_ids = {str(it['item_id']) for it in raw_items}
-            
-            # Get already indexed item IDs
-            indexed_ids = self.chroma.get_indexed_item_ids()
-            
-            # Find new items
-            new_item_ids = all_item_ids - indexed_ids
-            
-            # Filter to only new items
-            new_items_data = [it for it in raw_items if str(it['item_id']) in new_item_ids]
-            
-            self.index_progress["total_items"] = len(new_items_data)
-            self.index_progress["processed_items"] = 0
-            self.index_progress["skipped_items"] = len(indexed_ids)
-            
-            if len(new_items_data) == 0:
-                print("No new items to index.")
-                return
-            
-            print(f"Found {len(new_items_data)} new items to index (skipping {len(indexed_ids)} already indexed)")
-            
-            items = [ZoteroItem(filepath=it['pdf_path'], metadata=it) for it in new_items_data]
-
-            # Extract text for each new item
+            # Phase 1: Extract text from PDFs
             for item in items:
                 if self._cancel_indexing:
                     break
@@ -445,24 +229,31 @@ class ZoteroChatbot:
                     self.index_progress["processed_items"] += 1
                     item.metadata['pages_data'] = []
 
-            # Vectorize each new item
+            # Phase 2: Chunk, embed, and store
+            expected_dim = get_embedding_dimension(self.embedding_model_id)
+            
             for item in items:
                 if self._cancel_indexing:
                     break
                 pages_data = item.metadata.get('pages_data') or []
                 if not pages_data:
-                    # Item was already marked as failed in PDF extraction phase
-                    # Skip silently without incrementing progress again
                     continue
                 
+                # Chunk with page awareness
                 chunks_with_pages = self.chunk_text_with_pages(pages_data)
                 if not chunks_with_pages:
+                    skip_reason = f"Item {item.metadata.get('item_id')}: No chunks created from pages data"
+                    print(f"SKIPPED: {skip_reason}")
+                    self.index_progress["skip_reasons"].append(skip_reason)
                     self.index_progress["processed_items"] += 1
                     continue
                 
                 chunks = [c['text'] for c in chunks_with_pages]
+                
+                # Batch embedding (5-10× faster than sequential)
                 try:
-                    vectors = [get_embedding(chunk, self.embedding_model_id) for chunk in chunks]
+                    vectors = get_embeddings_batch(chunks, self.embedding_model_id)
+                    vectors = [v.tolist() if hasattr(v, 'tolist') else v for v in vectors]
                 except Exception as e:
                     skip_reason = f"Item {item.metadata.get('item_id')}: Embedding generation failed - {str(e)}"
                     print(f"ERROR: {skip_reason}")
@@ -470,8 +261,7 @@ class ZoteroChatbot:
                     self.index_progress["processed_items"] += 1
                     continue
                 
-                from backend.embed_utils import get_embedding_dimension
-                expected_dim = get_embedding_dimension(self.embedding_model_id)
+                # Validate embedding dimensions
                 if vectors and len(vectors[0]) != expected_dim:
                     skip_reason = f"Item {item.metadata.get('item_id')}: Unexpected embedding dimension {len(vectors[0])}, expected {expected_dim}"
                     print(f"ERROR: {skip_reason}")
@@ -479,6 +269,7 @@ class ZoteroChatbot:
                     self.index_progress["processed_items"] += 1
                     continue
 
+                # Generate unique chunk IDs and metadata
                 item_id = str(item.metadata.get('item_id'))
                 chunk_ids = [f"{item_id}:{i}" for i in range(len(chunks))]
 
@@ -489,9 +280,9 @@ class ZoteroChatbot:
                 collections = meta_src.get("collections") or ""
                 item_type = meta_src.get("item_type") or ""
                 
-                # Parse year as integer (supports format like "2020-01-15" or just "2020")
+                # Parse year as integer
                 year_str = meta_src.get("date") or ""
-                year = 0  # Default to 0 instead of None (ChromaDB doesn't accept None)
+                year = 0
                 if year_str:
                     match = re.search(r'\b(19|20)\d{2}\b', year_str)
                     if match:
@@ -509,9 +300,9 @@ class ZoteroChatbot:
                         "tags": tags,
                         "collections": collections,
                         "item_type": item_type,
-                        "year": year,  # Integer (0 if unknown)
+                        "year": year,
                         "pdf_path": pdf_path,
-                        "page": chunk_info.get('page', 0),  # Internal page number
+                        "page": chunk_info.get('page', 0),
                         "page_label": chunk_info.get('page_label', str(chunk_info.get('page', 0))),
                         "zotero_id": item_id,
                     })
@@ -529,10 +320,8 @@ class ZoteroChatbot:
                     print(f"ERROR: {skip_reason}")
                     self.index_progress["skip_reasons"].append(skip_reason)
                 
-                # Update progress after processing this item (success or failure)
+                # Update progress
                 self.index_progress["processed_items"] += 1
-                
-                # Calculate time estimates
                 elapsed = time.time() - self.index_progress["start_time"]
                 self.index_progress["elapsed_seconds"] = int(elapsed)
                 
@@ -545,33 +334,31 @@ class ZoteroChatbot:
                 
                 time.sleep(0)
             
-            # Rebuild BM25 index after adding new chunks
+            # Build BM25 index after adding all chunks
             successful_items = self.index_progress["processed_items"] - len(self.index_progress.get("skip_reasons", []))
             if successful_items > 0:
-                print(f"Rebuilding BM25 index after indexing {successful_items} items...")
+                print(f"Building BM25 index after indexing {successful_items} items...")
                 self.chroma.build_bm25_index()
             
             # Print summary
-            print(f"\n=== Indexing Summary ===")
+            print(f"\n=== {mode_label.title()} Indexing Summary ===")
             print(f"Total items attempted: {self.index_progress['total_items']}")
             print(f"Successfully indexed: {successful_items}")
             print(f"Skipped/Failed: {len(self.index_progress.get('skip_reasons', []))}")
             
-            # Check if ALL new items failed
             if successful_items == 0 and self.index_progress['total_items'] > 0:
-                error_msg = f"All {self.index_progress['total_items']} new items failed to index. Common causes: PDFs not found (check storage path), network drive issues, or file permissions."
+                error_msg = f"All {self.index_progress['total_items']} items failed to index. Common causes: PDFs not found (check storage path), network drive issues, or file permissions."
                 print(f"FATAL ERROR: {error_msg}")
                 self.index_progress["error"] = error_msg
             
             if self.index_progress.get('skip_reasons'):
                 print(f"\nSkip reasons:")
-                for reason in self.index_progress['skip_reasons'][:10]:  # Show first 10
+                for reason in self.index_progress['skip_reasons'][:10]:
                     print(f"  - {reason}")
                 if len(self.index_progress['skip_reasons']) > 10:
                     print(f"  ... and {len(self.index_progress['skip_reasons']) - 10} more")
-            print(f"========================\n")
+            print(f"{'=' * 30}\n")
         except Exception as e:
-            # Catch any unexpected exceptions at thread level
             import traceback
             error_msg = f"Indexing crashed: {str(e)}"
             traceback_str = traceback.format_exc()
@@ -581,6 +368,52 @@ class ZoteroChatbot:
         finally:
             self.is_indexing = False
             self._cancel_indexing = False
+
+    def _index_library_worker(self):
+        """Full reindex: process all items with PDFs."""
+        try:
+            raw_items = self.zlib.search_parent_items_with_pdfs()
+        except Exception as e:
+            error_str = str(e)
+            if "database is locked" in error_str.lower():
+                error_msg = "Database is locked — please close Zotero completely before syncing."
+            else:
+                error_msg = f"Failed to access Zotero database: {error_str}"
+            print(f"FATAL ERROR: {error_msg}")
+            self.index_progress["error"] = error_msg
+            self.is_indexing = False
+            self._cancel_indexing = False
+            return
+        
+        self._index_items_worker(raw_items, mode_label="full")
+
+    def _index_library_incremental_worker(self):
+        """Incremental index: only process new items not already in the database."""
+        try:
+            raw_items = self.zlib.search_parent_items_with_pdfs()
+        except Exception as e:
+            error_str = str(e)
+            if "database is locked" in error_str.lower():
+                error_msg = "Database is locked — please close Zotero completely before syncing."
+            else:
+                error_msg = f"Failed to access Zotero database: {error_str}"
+            print(f"FATAL ERROR: {error_msg}")
+            self.index_progress["error"] = error_msg
+            self.is_indexing = False
+            self._cancel_indexing = False
+            return
+        
+        # Filter to only new items
+        all_item_ids = {str(it['item_id']) for it in raw_items}
+        indexed_ids = self.chroma.get_indexed_item_ids()
+        new_item_ids = all_item_ids - indexed_ids
+        new_items_data = [it for it in raw_items if str(it['item_id']) in new_item_ids]
+        
+        self.index_progress["skipped_items"] = len(indexed_ids)
+        
+        self._index_items_worker(new_items_data, mode_label="incremental")
+
+
     
     def start_indexing(self, incremental: bool = True):
         """Start indexing in a background thread. No-op if already indexing.
