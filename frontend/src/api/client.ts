@@ -1,48 +1,58 @@
-// In Electron production, use the full backend URL
-// In development (Vite dev server), use relative paths with proxy
-const isElectron = navigator.userAgent.includes('Electron');
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || (isElectron ? "http://localhost:8000" : "");
+import { invoke } from '@tauri-apps/api/core';
 
 // Log API client configuration for debugging
-console.log('[API Client] Configuration:');
-console.log('  - Electron mode:', isElectron);
-console.log('  - BASE_URL:', BASE_URL);
-console.log('  - User agent:', navigator.userAgent);
+console.log('[API Client] Initializing Native Tauri Bridge');
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const fullPath = BASE_URL + (path.startsWith("/") ? path : `/${path}`);
-  const res = await fetch(fullPath, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-    signal: options.signal,
-    ...options,
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Request failed: ${res.status} ${text}`);
-  }
-
-  const data = (await res.json()) as any;
+  // Strip leading slash
+  const route = path.startsWith("/") ? path.substring(1) : path;
   
-  // Check if the response contains an error field (backend error responses)
-  if (data && typeof data === 'object' && 'error' in data) {
-    throw new Error(data.error || 'An error occurred');
+  // Try to parse body if it exists
+  let payload = {};
+  if (options.body && typeof options.body === 'string') {
+    try {
+      payload = JSON.parse(options.body);
+    } catch (e) {
+      console.warn("Failed to parse request body as JSON:", e);
+    }
   }
 
-  return data as T;
+  // Map REST paths to Tauri Commands
+  // Example: "api/chat" -> "chat_command"
+  const commandMap: Record<string, string> = {
+    "api/chat": "chat_command",
+    "api/health": "health_check",
+    "api/db_health": "health_check",
+    "api/settings": "get_settings",
+    "api/search_items": "search_items"
+  };
+
+  const command = commandMap[route];
+
+  if (!command) {
+    console.warn(`[Tauri IPC] Unmapped route: ${route}`);
+    // Fallback or throw error depending on strictness
+    throw new Error(`Unmapped API route for native IPC: ${route}`);
+  }
+
+  try {
+    console.log(`[Tauri IPC] Invoking ${command}`, payload);
+    const result = await invoke<T>(command, payload);
+    return result;
+  } catch (error) {
+    console.error(`[Tauri IPC] Error invoking ${command}:`, error);
+    throw new Error(typeof error === 'string' ? error : (error as any).message || 'Unknown IPC error');
+  }
 }
 
 /**
- * Configured fetch function that automatically prepends BASE_URL
- * Use this instead of direct fetch() calls to ensure proper URL resolution in Electron
+ * Fallback fetch function for raw URLs (e.g., fetching a PDF)
  */
 function apiFetch(path: string, options?: RequestInit): Promise<Response> {
-  const fullPath = BASE_URL + (path.startsWith("/") ? path : `/${path}`);
-  console.log(`[API Fetch] ${options?.method || 'GET'} ${fullPath}`);
-  return fetch(fullPath, options);
+  // In a fully native app, we shouldn't use fetch for local resources.
+  // We should use tauri's convertFileSrc for PDFs, or an IPC command that returns bytes.
+  console.warn(`[Tauri IPC] apiFetch called for ${path}. This should be refactored to native FS access.`);
+  return fetch(path, options);
 }
 
-export { BASE_URL, request, apiFetch };
+export { request, apiFetch };
